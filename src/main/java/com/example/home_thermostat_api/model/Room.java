@@ -1,6 +1,9 @@
 package com.example.home_thermostat_api.model;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -24,9 +27,10 @@ public class Room {
 
     @ManyToOne
     @JoinColumn(name = "home_id")
+    @JsonIgnore
     private Home home;
 
     @OneToMany(mappedBy = "room")
-    private List<TemperatureReading> temperatureReadings;
+    private List<TemperatureReading> temperatureReadings = new ArrayList<>();
 
 }
