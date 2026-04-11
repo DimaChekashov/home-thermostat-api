@@ -10,7 +10,7 @@ spring:
     activate:
       on-profile: development
   datasource:
-    url: jdbc:postgresql://localhost:5432/rest_api
+    url: jdbc:postgresql://localhost:5433/rest_api
     username: postgres
     password: "admin"
     driver-class-name: org.postgresql.Driver
