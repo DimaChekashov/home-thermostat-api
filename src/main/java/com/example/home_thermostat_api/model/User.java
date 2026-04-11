@@ -1,6 +1,6 @@
 package com.example.home_thermostat_api.model;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -13,17 +13,17 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class TemperatureReading {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Double temperature;
-    private LocalDateTime timestamp;
+    private String name;
+    private String email;
+    private String password;
 
-    @ManyToOne
-    @JoinColumn(name = "room_id")
-    private Room room;
+    @OneToMany(mappedBy = "user")
+    private List<Home> homes;
 
 }
