@@ -1,5 +1,7 @@
 package com.example.home_thermostat_api.model;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,13 +14,12 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Temperature {
-    
+public class TemperatureReading {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(nullable = false)
+
     private Double temperature;
-    
+    private LocalDateTime timestamp;
 }
