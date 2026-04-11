@@ -1,6 +1,5 @@
 package com.example.home_thermostat_api.service;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -22,7 +21,7 @@ public class UserService {
 
     public List<Home> getAllHomesByUserId(Long userId) {
         User user = getById(userId);
-        return user.getHomes() != null ? user.getHomes() : Collections.emptyList();
+        return user.getHomes();
     }
 
     public User create(User user) {

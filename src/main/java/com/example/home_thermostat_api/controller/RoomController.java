@@ -1,0 +1,38 @@
+package com.example.home_thermostat_api.controller;
+
+import com.example.home_thermostat_api.model.Room;
+import com.example.home_thermostat_api.model.TemperatureReading;
+import com.example.home_thermostat_api.service.RoomService;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+
+@RequiredArgsConstructor
+@RequestMapping("/api/rooms")
+@RestController
+public class RoomController {
+    private final RoomService roomService;
+
+    @GetMapping("/{id}")
+    public Room getById(@PathVariable Long id) {
+        return roomService.getById(id);
+    }
+
+    @GetMapping("/{id}/temperatures")
+    public List<TemperatureReading> getAllRoomsByHoomId(@PathVariable Long id) {
+        return roomService.getAllTemperaturesByRoomId(id);
+    }
+
+    @PostMapping("/{id}/target")
+    public Room updateTargetTemperature(@PathVariable Long id, @PathVariable Double target) {
+        return roomService.updateTargetTemperature(id, target);
+    }
+}

@@ -30,7 +30,7 @@ public class Room {
     @JsonIgnore
     private Home home;
 
-    @OneToMany(mappedBy = "room")
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     private List<TemperatureReading> temperatureReadings = new ArrayList<>();
 
 }

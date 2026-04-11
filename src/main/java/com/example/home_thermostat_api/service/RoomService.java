@@ -1,31 +1,42 @@
 package com.example.home_thermostat_api.service;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import com.example.home_thermostat_api.model.Home;
-import com.example.home_thermostat_api.model.User;
-import com.example.home_thermostat_api.repository.UserRepository;
+import com.example.home_thermostat_api.model.Room;
+import com.example.home_thermostat_api.model.TemperatureReading;
+import com.example.home_thermostat_api.repository.RoomRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
 public class RoomService {
-    private final UserRepository userRepository;
+    private final RoomRepository roomRepository;
+    private final HomeService homeService;
 
-    public User getById(Long id) {
-        return userRepository.findById(id).orElseThrow(RuntimeException::new);
+    public Room getById(Long id) {
+        return roomRepository.findById(id).orElseThrow(RuntimeException::new);
     }
 
-    public List<Home> getAllHomesByUserId(Long userId) {
-        User user = getById(userId);
-        return user.getHomes() != null ? user.getHomes() : Collections.emptyList();
+    public List<TemperatureReading> getAllTemperaturesByRoomId(Long roomId) {
+        Room room = getById(roomId);
+        return room.getTemperatureReadings();
     }
 
-    public User create(User user) {
-        return userRepository.save(user);
+    public Room create(Long homeId, Room room) {
+        Home home = homeService.getById(homeId);
+        room.setHome(home);
+        return roomRepository.save(room);
+    }
+
+    public Room updateTargetTemperature(Long id, Double target) {
+        Room room = getById(id);
+
+        room.setTargetTemperature(target);
+
+        return roomRepository.save(room);
     }
 }

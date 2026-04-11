@@ -1,6 +1,5 @@
 package com.example.home_thermostat_api.service;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -20,9 +19,9 @@ public class HomeService {
         return homeRepository.findById(id).orElseThrow(RuntimeException::new);
     }
 
-    public List<Room> getAllRoomsByHoomId(Long homeId) {
+    public List<Room> getAllRoomsByHomeId(Long homeId) {
         Home home = getById(homeId);
-        return home.getRooms() != null ? home.getRooms() : Collections.emptyList();
+        return home.getRooms();
     }
 
     public Home create(Home home) {
