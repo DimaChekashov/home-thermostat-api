@@ -3,7 +3,6 @@ package com.example.home_thermostat_api.controller;
 import com.example.home_thermostat_api.model.Home;
 import com.example.home_thermostat_api.model.Room;
 import com.example.home_thermostat_api.service.HomeService;
-import com.example.home_thermostat_api.service.RoomService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 public class HomeController {
     private final HomeService homeService;
-    private final RoomService roomService;
 
     @GetMapping("/{id}")
     public Home getById(@PathVariable Long id) {
@@ -43,11 +41,6 @@ public class HomeController {
     @GetMapping("/{id}/rooms")
     public List<Room> getAllRoomsByHomeId(@PathVariable Long id) {
         return homeService.getAllRoomsByHomeId(id);
-    }
-
-    @PostMapping("/{id}/rooms")
-    public Room createRoom(@PathVariable Long id, @RequestBody Room room) {
-        return roomService.create(id, room);
     }
 
 }
