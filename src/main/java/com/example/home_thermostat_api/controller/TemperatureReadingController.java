@@ -6,10 +6,10 @@ import com.example.home_thermostat_api.service.TemperatureReadingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,15 +27,19 @@ public class TemperatureReadingController {
         return temperatureReadingService.getAll();
     }
 
-    @GetMapping("/{id}")
-    public TemperatureReading getById(@PathVariable Long id) {
-        return temperatureReadingService.getById(id);
+    @GetMapping("/room/{roomId}")
+    public List<TemperatureReading> getTemperatureReadingByRoomId(@PathVariable Long roomId) {
+        return temperatureReadingService.getTemperatureReadingByRoomId(roomId);
+    }
+
+    @GetMapping("/home/{homeId}")
+    public List<TemperatureReading> getTemperatureReadingByHomeId(@PathVariable Long homeId) {
+        return temperatureReadingService.getTemperatureReadingByHomeId(homeId);
     }
 
     @PostMapping
-    public TemperatureReading create(@RequestBody @Valid TemperatureReading temperatureReading) {
-        temperatureReading.setTimestamp(LocalDateTime.now());
-        temperatureReading.setId(null);
-        return temperatureReadingService.create(temperatureReading);
+    public TemperatureReading create(@RequestParam Long roomId,
+            @RequestBody @Valid TemperatureReading temperatureReading) {
+        return temperatureReadingService.create(roomId, temperatureReading);
     }
 }
