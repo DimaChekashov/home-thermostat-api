@@ -12,14 +12,18 @@ import com.example.home_thermostat_api.model.Room;
 import com.example.home_thermostat_api.model.TemperatureReading;
 import com.example.home_thermostat_api.repository.TemperatureReadingRepository;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor
 @Service
 public class TemperatureReadingService {
     private final TemperatureReadingRepository temperatureReadingRepository;
     private final RoomService roomService;
     private final HomeService homeService;
+
+    public TemperatureReadingService(TemperatureReadingRepository temperatureReadingRepository, RoomService roomService,
+            HomeService homeService) {
+        this.temperatureReadingRepository = temperatureReadingRepository;
+        this.roomService = roomService;
+        this.homeService = homeService;
+    }
 
     public List<TemperatureReading> getAll() {
         return temperatureReadingRepository.findAll();

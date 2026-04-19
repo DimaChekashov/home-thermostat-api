@@ -4,8 +4,6 @@ import com.example.home_thermostat_api.model.Room;
 import com.example.home_thermostat_api.model.TemperatureReading;
 import com.example.home_thermostat_api.service.RoomService;
 
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,11 +15,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@RequiredArgsConstructor
 @RequestMapping("/api/rooms")
 @RestController
 public class RoomController {
     private final RoomService roomService;
+
+    public RoomController(RoomService roomService) {
+        this.roomService = roomService;
+    }
 
     @GetMapping("/{id}")
     public Room getById(@PathVariable Long id) {

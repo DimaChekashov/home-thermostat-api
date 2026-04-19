@@ -4,7 +4,6 @@ import com.example.home_thermostat_api.model.TemperatureReading;
 import com.example.home_thermostat_api.service.TemperatureReadingService;
 
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
@@ -16,11 +15,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@RequiredArgsConstructor
 @RequestMapping("/api/temperatures")
 @RestController
 public class TemperatureReadingController {
     private final TemperatureReadingService temperatureReadingService;
+
+    public TemperatureReadingController(TemperatureReadingService temperatureReadingService) {
+        this.temperatureReadingService = temperatureReadingService;
+    }
 
     @GetMapping
     public List<TemperatureReading> getAll() {

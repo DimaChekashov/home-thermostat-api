@@ -9,13 +9,15 @@ import com.example.home_thermostat_api.model.Room;
 import com.example.home_thermostat_api.model.TemperatureReading;
 import com.example.home_thermostat_api.repository.RoomRepository;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor
 @Service
 public class RoomService {
     private final RoomRepository roomRepository;
     private final HomeService homeService;
+
+    public RoomService(RoomRepository roomRepository, HomeService homeService) {
+        this.roomRepository = roomRepository;
+        this.homeService = homeService;
+    }
 
     public Room getById(Long id) {
         return roomRepository.findById(id).orElseThrow(RuntimeException::new);

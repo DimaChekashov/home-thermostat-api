@@ -8,12 +8,13 @@ import com.example.home_thermostat_api.model.Home;
 import com.example.home_thermostat_api.model.Room;
 import com.example.home_thermostat_api.repository.HomeRepository;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor
 @Service
 public class HomeService {
     private final HomeRepository homeRepository;
+
+    public HomeService(HomeRepository homeRepository) {
+        this.homeRepository = homeRepository;
+    }
 
     public Home getById(Long id) {
         return homeRepository.findById(id).orElseThrow(RuntimeException::new);

@@ -5,7 +5,6 @@ import com.example.home_thermostat_api.model.Room;
 import com.example.home_thermostat_api.service.HomeService;
 
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,11 +16,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@RequiredArgsConstructor
 @RequestMapping("/api/homes")
 @RestController
 public class HomeController {
     private final HomeService homeService;
+
+    public HomeController(HomeService homeService) {
+        this.homeService = homeService;
+    }
 
     @GetMapping("/{id}")
     public Home getById(@PathVariable Long id) {
