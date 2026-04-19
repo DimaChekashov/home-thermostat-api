@@ -44,5 +44,4 @@ public class HomeController {
     public List<Room> getAllRoomsByHomeId(@PathVariable Long id) {
         return homeService.getAllRoomsByHomeId(id);
     }
-
 }

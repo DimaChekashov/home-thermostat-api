@@ -30,12 +30,12 @@ public class RoomController {
     }
 
     @GetMapping("/{id}/temperatures")
-    public List<TemperatureReading> getAllRoomsByHoomId(@PathVariable Long id) {
+    public List<TemperatureReading> getAllTemperaturesByRoomId(@PathVariable Long id) {
         return roomService.getAllTemperaturesByRoomId(id);
     }
 
     @PostMapping("/{id}/target")
-    public Room updateTargetTemperature(@PathVariable Long id, @PathVariable Double target) {
+    public Room updateTargetTemperature(@PathVariable Long id, @RequestParam Double target) {
         return roomService.updateTargetTemperature(id, target);
     }
 
