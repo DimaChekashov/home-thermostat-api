@@ -3,9 +3,11 @@ package com.example.home_thermostat_api.security;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Date;
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.crypto.SecretKey;
 
@@ -17,6 +19,7 @@ import com.example.home_thermostat_api.model.Token;
 import com.example.home_thermostat_api.model.User;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
@@ -26,18 +29,28 @@ public class JwtUtil {
     private String SECRET_KEY;
 
     @Value("${jwt.access-token-duration-second:300}")
-    private long EXPIRATION_SECONDS;
+    private long ACCESS_TOKEN_EXPIRATION_SECONDS;
 
-    private long getExpirationTime(long time) {
-        return time * 1000;
-    }
+    @Value("${jwt.refresh-token-duration-second:604800}")
+    private long REFRESH_TOKEN_EXPIRATION_SECONDS;
 
-    public Token generateAccessToken(Map<String, Object> extraClaims,
-            long duration, TemporalUnit durationType, User user) {
+    @Value("${JWT_ACCESS_TOKEN_DURATION_MINUTE}")
+    private long accessTokenDurationMinute;
+
+    @Value("${JWT_ACCESS_TOKEN_DURATION_SECOND}")
+    private long accessTokenDurationSecond;
+
+    @Value("${JWT_REFRESH_TOKEN_DURATION_DAY}")
+    private long refreshTokenDurationDay;
+
+    @Value("${JWT_REFRESH_TOKEN_DURATION_SECOND}")
+    private long refreshTokenDurationSecond;
+
+    public Token generateAccessToken(Map<String, Object> extraClaims, User user) {
         String username = user.getName();
 
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime expiryDate = now.plus(duration, durationType);
+        LocalDateTime expiryDate = now.plus(accessTokenDurationMinute, ChronoUnit.MINUTES);
 
         String token = Jwts.builder()
                 .setClaims(extraClaims)
@@ -51,31 +64,59 @@ public class JwtUtil {
                 token, expiryDate, user);
     }
 
-    public String generateToken(String username) {
-        return Jwts.builder()
+    public Token generateRefreshToken(User user) {
+        String username = user.getName();
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expiryDate = now.plus(refreshTokenDurationDay, ChronoUnit.DAYS);
+
+        String token = Jwts.builder()
                 .setSubject(username)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + getExpirationTime(EXPIRATION_SECONDS)))
+                .setIssuedAt(toDate(now))
+                .setExpiration(toDate(expiryDate))
                 .signWith(getSigningKey())
                 .compact();
+
+        return new Token(TokenType.REFRESH, token, expiryDate, user);
     }
 
-    public boolean validateToken(String token, String username) {
-        final String tokenUsername = extractUsername(token);
-        return (tokenUsername.equals(username) && !isTokenExpired(token));
+    public boolean validateToken(String tokenValue) {
+        if (tokenValue == null) {
+            return false;
+        }
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(tokenValue);
+            return true;
+        } catch (JwtException e) {
+            return false;
+        }
+    }
+
+    public String getUsernameFromToken(String tokenValue) {
+        return extractClaim(tokenValue, Claims::getSubject);
+    }
+
+    public LocalDateTime getExpiryDateFromToken(String tokenValue) {
+        return toLocalDateTime(extractClaim(tokenValue,
+                Claims::getExpiration));
+    }
+
+    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    private LocalDateTime toLocalDateTime(Date date) {
+        ZoneOffset zoneOffset = ZoneOffset.UTC;
+        return date.toInstant().atOffset(zoneOffset).toLocalDateTime();
     }
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = SECRET_KEY.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    public String extractUsername(String token) {
-        return extractAllClaims(token).getSubject();
-    }
-
-    private boolean isTokenExpired(String token) {
-        return extractAllClaims(token).getExpiration().before(new Date());
     }
 
     private Claims extractAllClaims(String token) {

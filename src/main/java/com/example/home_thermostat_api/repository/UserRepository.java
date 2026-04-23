@@ -9,9 +9,9 @@ import com.example.home_thermostat_api.model.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByName(String name);
+    Optional<User> findByUsername(String name);
 
-    Boolean existsByName(String name);
+    Boolean existsByUsername(String name);
 
     Boolean existsByEmail(String email);
 }
