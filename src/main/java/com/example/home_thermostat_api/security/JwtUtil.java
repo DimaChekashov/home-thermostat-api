@@ -5,6 +5,7 @@ import java.util.Date;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -13,15 +14,21 @@ import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtil {
-    private String SECRET_KEY = "mySuperSecretKeyWhichIsLongEnoughForHS256Algorithm!123";
+    @Value("${jwt.secret}")
+    private String SECRET_KEY;
 
-    private long EXPIRATION_TIME = 86400000;
+    @Value("${jwt.access-token-duration-second:300}")
+    private long EXPIRATION_SECONDS;
+
+    private long getExpirationTime(long time) {
+        return time * 1000;
+    }
 
     public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + getExpirationTime(EXPIRATION_SECONDS)))
                 .signWith(getSigningKey())
                 .compact();
     }
