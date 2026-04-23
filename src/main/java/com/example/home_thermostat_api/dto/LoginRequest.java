@@ -1,22 +1,7 @@
 package com.example.home_thermostat_api.dto;
 
-public class LoginRequest {
-    private String name;
-    private String password;
+import jakarta.validation.constraints.NotBlank;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+public record LoginRequest(@NotBlank(message = "Name is required") String name,
+        @NotBlank(message = "Password is required") String password) {
 }

@@ -17,15 +17,17 @@ public class UserService {
     }
 
     public User getById(Long id) {
-        return userRepository.findById(id).orElseThrow(RuntimeException::new);
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    }
+
+    public User getByName(String name) {
+        return userRepository.findByName(name)
+                .orElseThrow(() -> new RuntimeException("User not found with name: " + name));
     }
 
     public List<Home> getAllHomesByUserId(Long userId) {
         User user = getById(userId);
         return user.getHomes();
-    }
-
-    public User create(User user) {
-        return userRepository.save(user);
     }
 }

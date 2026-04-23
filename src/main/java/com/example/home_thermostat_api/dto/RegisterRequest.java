@@ -2,56 +2,13 @@ package com.example.home_thermostat_api.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class RegisterRequest {
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
-    @JsonProperty("name")
-    private String name;
+public record RegisterRequest(
+        @JsonProperty("name") @NotBlank(message = "Name is required") @Size(min = 3, max = 50, message = "Name must be between 3 and 50 characters") String name,
+        @JsonProperty("email") @NotBlank(message = "Email is required") @Email(message = "Email should be valid") String email,
+        @JsonProperty("password") @NotBlank(message = "Password is required") @Size(min = 6, message = "Password must be at least 6 characters") String password) {
 
-    @JsonProperty("email")
-    private String email;
-
-    @JsonProperty("password")
-    private String password;
-
-    public RegisterRequest() {
-    }
-
-    public RegisterRequest(String name, String email, String password) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    @Override
-    public String toString() {
-        return "RegisterRequest{" +
-                "name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + (password != null ? "***" : "null") + '\'' +
-                '}';
-    }
 }

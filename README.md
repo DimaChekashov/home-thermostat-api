@@ -56,11 +56,16 @@ docker-compose restart postgres
 
 ## API Endpoints
 
+### Authentication
+
+- POST - `/api/auth/register` New user registration
+- POST - `/api/auth/login` Login
+
 ### User
 
 - GET - `/api/users/{id}` Get user by ID
 - GET - `/api/users/{id}/homes` Get all homes for a user
-- POST - `/api/users` Create a new user
+- GET - `/api/users/me` Get authorized user info
 
 ### Home
 

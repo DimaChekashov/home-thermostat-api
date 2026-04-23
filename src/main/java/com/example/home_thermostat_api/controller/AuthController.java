@@ -1,22 +1,20 @@
 package com.example.home_thermostat_api.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.home_thermostat_api.dto.RegisterRequest;
+import com.example.home_thermostat_api.dto.RegisterResponse;
 import com.example.home_thermostat_api.dto.LoginRequest;
+import com.example.home_thermostat_api.dto.LoginResponse;
 import com.example.home_thermostat_api.service.AuthService;
-
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -30,45 +28,35 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
         try {
-            System.out.println(request.toString());
             String token = authService.register(
-                    request.getName(),
-                    request.getEmail(),
-                    request.getPassword());
+                    request.name(),
+                    request.email(),
+                    request.password());
 
-            Map<String, String> response = new HashMap<>();
-            response.put("token", token);
-            response.put("type", "Bearer");
+            RegisterResponse response = new RegisterResponse(true, token, "Bearer", null);
             return ResponseEntity.ok(response);
-
         } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(error);
+            RegisterResponse errorResponse = new RegisterResponse(false, null, null, e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            request.getName(),
-                            request.getPassword()));
+                            request.name(),
+                            request.password()));
 
-            String token = authService.login(request.getName());
+            String token = authService.login(request.name());
 
-            Map<String, String> response = new HashMap<>();
-            response.put("token", token);
-            response.put("type", "Bearer");
+            LoginResponse response = new LoginResponse(true, token, "Bearer");
             return ResponseEntity.ok(response);
-
         } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Wrong login or password");
-            return ResponseEntity.status(401).body(error);
+            return ResponseEntity.badRequest().build();
         }
     }
 }
