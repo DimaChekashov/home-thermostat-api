@@ -1,5 +1,6 @@
 package com.example.home_thermostat_api.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -82,5 +83,40 @@ public class Role implements GrantedAuthority {
     @Override
     public String getAuthority() {
         return this.name.toUpperCase();
+    }
+
+    public static RoleBuilder builder() {
+        return new RoleBuilder();
+    }
+
+    public static class RoleBuilder {
+        private Long id;
+        private String name;
+        private Set<User> users = new HashSet<>();
+        private Set<Permission> permissions = new HashSet<>();
+
+        public RoleBuilder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public RoleBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public RoleBuilder users(Set<User> users) {
+            this.users = users;
+            return this;
+        }
+
+        public RoleBuilder permissions(Set<Permission> permissions) {
+            this.permissions = permissions;
+            return this;
+        }
+
+        public Role build() {
+            return new Role(id, name, users, permissions);
+        }
     }
 }

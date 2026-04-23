@@ -1,73 +1,86 @@
 package com.example.home_thermostat_api.config;
 
+import java.util.Collections;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
+import com.example.home_thermostat_api.security.JwtAuthenticatEntryPoint;
 import com.example.home_thermostat_api.security.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    private static final String SWAGGER_UI_URL = "/swagger-ui/**";
+    private static final String API_DOCS_URL = "/v3/api-docs/**";
+    private static final String[] ALLOWED_URLS = {
+            SWAGGER_UI_URL, API_DOCS_URL
+    };
 
     @Autowired
-    private JwtAuthenticationFilter jwtAuthFilter;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private JwtAuthenticatEntryPoint jwtAuthenticatEntryPoint;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http)
+            throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-
-                .authorizeHttpRequests(auth -> auth.requestMatchers(
-                        "/swagger-ui/**",
-                        "/swagger-ui.html",
-                        "/v3/api-docs/**",
-                        "/v3/api-docs.yaml",
-                        "/swagger-resources/**",
-                        "/webjars/**",
-                        "/configuration/**",
-                        "/api/auth/**",
-                        "/error").permitAll()
-                        .anyRequest().authenticated())
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
+                .csrf(AbstractHttpConfigurer::disable);
+        http
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration configuration = new CorsConfiguration();
+                    configuration.setAllowedMethods(Collections.singletonList("*"));
+                    configuration.setAllowCredentials(true);
+                    configuration.setAllowedHeaders(Collections.singletonList("*"));
+                    configuration.setMaxAge(3600L);
+                    return configuration;
+                }));
+        http
+                .authorizeHttpRequests(authorize -> {
+                    authorize.requestMatchers(ALLOWED_URLS).permitAll();
+                    authorize.requestMatchers("/error").permitAll();
+                    authorize.requestMatchers("/api/auth/register")
+                            .permitAll();
+                    authorize.requestMatchers("/api/auth/login")
+                            .permitAll();
+                    authorize.requestMatchers("/api/auth/refresh")
+                            .permitAll();
+                    authorize.anyRequest().authenticated();
+                });
+        http
+                .sessionManagement(session -> session.sessionCreationPolicy(
+                        SessionCreationPolicy.STATELESS));
+        http
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticatEntryPoint));
+        http
+                .addFilterBefore(jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
-
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
-            throws Exception {
-        return config.getAuthenticationManager();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
+    static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }

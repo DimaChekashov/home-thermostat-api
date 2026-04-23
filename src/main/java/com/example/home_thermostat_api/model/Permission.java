@@ -1,5 +1,6 @@
 package com.example.home_thermostat_api.model;
 
+import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -29,11 +30,6 @@ public class Permission implements GrantedAuthority {
     @ManyToMany(mappedBy = "permissions")
     private Set<Role> roles;
 
-    public Permission(String resource, String operation) {
-        this.resource = resource;
-        this.operation = operation;
-    }
-
     @Override
     public String getAuthority() {
         return String.format(
@@ -43,6 +39,11 @@ public class Permission implements GrantedAuthority {
     }
 
     public Permission() {
+    }
+
+    public Permission(String resource, String operation) {
+        this.resource = resource;
+        this.operation = operation;
     }
 
     public Long getId() {

@@ -35,8 +35,7 @@ public class UserController {
 
     @GetMapping("/me")
     public User getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.getByName(userDetails.getUsername());
-
+        User user = userService.getByUsername(userDetails.getUsername());
         return user;
     }
 

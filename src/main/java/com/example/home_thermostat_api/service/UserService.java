@@ -21,9 +21,9 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
-    public User getByName(String name) {
-        return userRepository.findByName(name)
-                .orElseThrow(() -> new RuntimeException("User not found with name: " + name));
+    public User getByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Username not found with name: " + username));
     }
 
     public List<Home> getAllHomesByUserId(Long userId) {

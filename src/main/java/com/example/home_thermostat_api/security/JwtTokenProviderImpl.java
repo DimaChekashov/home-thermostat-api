@@ -4,7 +4,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
@@ -24,7 +23,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
 @Component
-public class JwtUtil {
+public class JwtTokenProviderImpl implements JwtTokenProvider {
     @Value("${jwt.secret}")
     private String SECRET_KEY;
 
@@ -47,7 +46,7 @@ public class JwtUtil {
     private long refreshTokenDurationSecond;
 
     public Token generateAccessToken(Map<String, Object> extraClaims, User user) {
-        String username = user.getName();
+        String username = user.getUsername();
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime expiryDate = now.plus(accessTokenDurationMinute, ChronoUnit.MINUTES);
@@ -65,7 +64,7 @@ public class JwtUtil {
     }
 
     public Token generateRefreshToken(User user) {
-        String username = user.getName();
+        String username = user.getUsername();
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime expiryDate = now.plus(refreshTokenDurationDay, ChronoUnit.DAYS);
