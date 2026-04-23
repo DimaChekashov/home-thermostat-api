@@ -1,12 +1,20 @@
 package com.example.home_thermostat_api.security;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.TemporalUnit;
 import java.util.Date;
+import java.util.Map;
 
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import com.example.home_thermostat_api.enums.TokenType;
+import com.example.home_thermostat_api.model.Token;
+import com.example.home_thermostat_api.model.User;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -22,6 +30,25 @@ public class JwtUtil {
 
     private long getExpirationTime(long time) {
         return time * 1000;
+    }
+
+    public Token generateAccessToken(Map<String, Object> extraClaims,
+            long duration, TemporalUnit durationType, User user) {
+        String username = user.getName();
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expiryDate = now.plus(duration, durationType);
+
+        String token = Jwts.builder()
+                .setClaims(extraClaims)
+                .setSubject(username)
+                .setIssuedAt(toDate(now))
+                .setExpiration(toDate(expiryDate))
+                .signWith(getSigningKey())
+                .compact();
+
+        return new Token(TokenType.ACCESS,
+                token, expiryDate, user);
     }
 
     public String generateToken(String username) {
@@ -57,5 +84,10 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    private Date toDate(LocalDateTime localDateTime) {
+        ZoneOffset zoneOffset = ZoneOffset.UTC;
+        return Date.from(localDateTime.toInstant(zoneOffset));
     }
 }
