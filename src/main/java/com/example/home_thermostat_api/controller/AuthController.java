@@ -18,6 +18,7 @@ import com.example.home_thermostat_api.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Tag(name = "Authentication", description = "API для аутентификации и управления сессиями")
 @RestController
@@ -33,8 +34,9 @@ public class AuthController {
     @ApiResponse(responseCode = "400", description = "Validation error")
     @ApiResponse(responseCode = "409", description = "Username or email already exists")
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
-        return authService.register(request);
+    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request,
+            HttpServletResponse response) {
+        return authService.register(request, response);
     }
 
     @Operation(summary = "User Login", description = "Authenticates a user by username and password. Returns JWT tokens.")
@@ -42,8 +44,8 @@ public class AuthController {
     @ApiResponse(responseCode = "401", description = "Invalid credentials")
     @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
-        return authService.login(loginRequest);
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+        return authService.login(loginRequest, response);
     }
 
     @Operation(summary = "Refresh Token", description = "Generates a new access token using a valid refresh token.")
@@ -52,11 +54,11 @@ public class AuthController {
     @ApiResponse(responseCode = "404", description = "Refresh token not provided")
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refreshToken(
-            @CookieValue(name = "refresh_token", required = false) String refreshToken) {
+            @CookieValue(name = "refresh_token", required = false) String refreshToken, HttpServletResponse response) {
         if (refreshToken == null) {
             return ResponseEntity.notFound().build();
         }
-        return authService.refresh(refreshToken);
+        return authService.refresh(refreshToken, response);
     }
 
     @Operation(summary = "Logout", description = "Invalidates current JWT tokens and clears cookies.")
@@ -65,7 +67,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<LoginResponse> logout(
             @CookieValue(name = "access_token", required = false) String accessToken,
-            @CookieValue(name = "refresh_token", required = false) String refreshToken) {
-        return authService.logout(accessToken, refreshToken);
+            @CookieValue(name = "refresh_token", required = false) String refreshToken, HttpServletResponse response) {
+        return authService.logout(accessToken, refreshToken, response);
     }
 }

@@ -1,6 +1,5 @@
 package com.example.home_thermostat_api.model;
 
-import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;

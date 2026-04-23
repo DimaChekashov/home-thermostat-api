@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +30,8 @@ import com.example.home_thermostat_api.repository.UserRepository;
 import com.example.home_thermostat_api.security.JwtTokenProviderImpl;
 import com.example.home_thermostat_api.util.CookieUtil;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 @Service
 public class AuthServiceImpl implements AuthService {
     @Autowired
@@ -40,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
     private TokenRepository tokenRepository;
 
     @Autowired
-    private JwtTokenProviderImpl jwtUtil;
+    private JwtTokenProviderImpl tokenProvider;
 
     @Autowired
     private CookieUtil cookieUtil;
@@ -55,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
     private RoleRepository roleRepository;
 
     @Override
-    public ResponseEntity<RegisterResponse> register(RegisterRequest registerRequest) {
+    public ResponseEntity<RegisterResponse> register(RegisterRequest registerRequest, HttpServletResponse response) {
         if (userRepository.existsByUsername(registerRequest.username())) {
             throw new AppException(HttpStatus.CONFLICT,
                     "Username '" + registerRequest.username() + "' already exists");
@@ -76,20 +77,18 @@ public class AuthServiceImpl implements AuthService {
 
         user = userRepository.save(user);
 
-        Token accessToken = jwtUtil.generateAccessToken(Map.of("role", user.getRole().getAuthority()), user);
-        Token refreshToken = jwtUtil.generateRefreshToken(user);
-
-        HttpHeaders responseHeaders = new HttpHeaders();
+        Token accessToken = tokenProvider.generateAccessToken(Map.of("role", user.getRole().getAuthority()), user);
+        Token refreshToken = tokenProvider.generateRefreshToken(user);
 
         tokenRepository.saveAll(List.of(accessToken, refreshToken));
-        addAccessTokenCookie(responseHeaders, accessToken);
-        addRefreshTokenCookie(responseHeaders, refreshToken);
+        addAccessTokenCookie(response, accessToken);
+        addRefreshTokenCookie(response, refreshToken);
 
         return ResponseEntity.ok(RegisterResponse.ok());
     }
 
     @Override
-    public ResponseEntity<LoginResponse> login(LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> login(LoginRequest loginRequest, HttpServletResponse response) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.username(), loginRequest.password()));
@@ -98,75 +97,66 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUsername(username).orElseThrow(
                 () -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
 
-        Token accessToken = jwtUtil.generateAccessToken(Map.of("role", user.getRole().getAuthority()), user);
-        Token refreshToken = jwtUtil.generateRefreshToken(user);
-
-        HttpHeaders responseHeaders = new HttpHeaders();
+        Token accessToken = tokenProvider.generateAccessToken(Map.of("role", user.getRole().getAuthority()), user);
+        Token refreshToken = tokenProvider.generateRefreshToken(user);
 
         revokeAllTokenOfUser(user);
 
         tokenRepository.saveAll(List.of(accessToken, refreshToken));
-        addAccessTokenCookie(responseHeaders, accessToken);
-        addRefreshTokenCookie(responseHeaders, refreshToken);
+        addAccessTokenCookie(response, accessToken);
+        addRefreshTokenCookie(response, refreshToken);
 
         SecurityContextHolder.getContext()
                 .setAuthentication(authentication);
 
         LoginResponse loginResponse = new LoginResponse(true, user.getRole().getName(), null);
-        return ResponseEntity.ok()
-                .headers(responseHeaders).body(loginResponse);
+        return ResponseEntity.ok().body(loginResponse);
     }
 
     @Override
-    public ResponseEntity<LoginResponse> refresh(String refreshToken) {
-        boolean refreshTokenValid = jwtUtil.validateToken(refreshToken);
+    public ResponseEntity<LoginResponse> refresh(String refreshToken, HttpServletResponse response) {
+        boolean refreshTokenValid = tokenProvider.validateToken(refreshToken);
 
         if (!refreshTokenValid) {
             throw new AppException(HttpStatus.BAD_REQUEST, "Refresh token is invalid");
         }
 
-        String username = jwtUtil.getUsernameFromToken(refreshToken);
+        String username = tokenProvider.getUsernameFromToken(refreshToken);
         User user = userRepository.findByUsername(username).orElseThrow(
                 () -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
 
-        Token newAccessToken = jwtUtil.generateAccessToken(Map.of("role", user.getRole().getAuthority()), user);
+        Token newAccessToken = tokenProvider.generateAccessToken(Map.of("role", user.getRole().getAuthority()), user);
 
-        HttpHeaders responseHeaders = new HttpHeaders();
-        addAccessTokenCookie(responseHeaders, newAccessToken);
+        addAccessTokenCookie(response, newAccessToken);
 
         LoginResponse loginResponse = new LoginResponse(true, user.getRole().getName(), null);
 
-        return ResponseEntity.ok().headers(responseHeaders).body(loginResponse);
+        return ResponseEntity.ok().body(loginResponse);
     }
 
     @Override
-    public ResponseEntity<LoginResponse> logout(String accessToken, String refreshToken) {
+    public ResponseEntity<LoginResponse> logout(String accessToken, String refreshToken, HttpServletResponse response) {
         SecurityContextHolder.clearContext();
 
-        String username = jwtUtil.getUsernameFromToken(accessToken);
+        String username = tokenProvider.getUsernameFromToken(accessToken);
         User user = userRepository.findByUsername(username).orElseThrow(
                 () -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
 
         revokeAllTokenOfUser(user);
 
-        HttpHeaders responseHeaders = new HttpHeaders();
-
-        responseHeaders.add(HttpHeaders.SET_COOKIE, cookieUtil.deleteAccessTokenCookie().toString());
-        responseHeaders.add(HttpHeaders.SET_COOKIE, cookieUtil.deleteRefreshTokenCookie().toString());
+        cookieUtil.clearTokenCookies(response);
 
         LoginResponse loginResponse = new LoginResponse(false, null, null);
 
-        return ResponseEntity.ok().headers(responseHeaders).body(loginResponse);
+        return ResponseEntity.ok().body(loginResponse);
     }
 
-    private void addAccessTokenCookie(HttpHeaders httpHeaders, Token token) {
-        httpHeaders.add(HttpHeaders.SET_COOKIE,
-                cookieUtil.createAccessTokenCookie(token.getValue()).toString());
+    private void addAccessTokenCookie(HttpServletResponse response, Token token) {
+        cookieUtil.createAccessTokenCookie(response, token.getValue());
     }
 
-    private void addRefreshTokenCookie(HttpHeaders httpHeaders, Token token) {
-        httpHeaders.add(HttpHeaders.SET_COOKIE,
-                cookieUtil.createRefreshTokenCookie(token.getValue()).toString());
+    private void addRefreshTokenCookie(HttpServletResponse response, Token token) {
+        cookieUtil.createRefreshTokenCookie(response, token.getValue());
     }
 
     private void revokeAllTokenOfUser(User user) {
