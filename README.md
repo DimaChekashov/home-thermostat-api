@@ -58,8 +58,10 @@ docker-compose restart postgres
 
 ### Authentication
 
-- POST - `/api/auth/register` New user registration
-- POST - `/api/auth/login` Login
+- POST - `/api/auth/register` Register a new user
+- POST - `/api/auth/login` Login with username and password
+- POST - `/api/auth/refresh` Refresh access token using refresh token
+- POST - `/api/auth/logout` Logout and revoke tokens
 
 ### User
 
