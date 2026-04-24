@@ -1,4 +1,4 @@
-package com.example.home_thermostat_api.util;
+package com.example.home_thermostat_api.utils;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;

@@ -5,7 +5,6 @@ spring:
     active: development
   config:
     import: optional:classpath:secret.properties
-
 ---
 spring:
   config:
@@ -20,6 +19,9 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+server:
+  port: 8080
+
 jwt:
   secret: ${JWT_TOKEN_SECRET}
   access-token-duration-minute: ${JWT_ACCESS_TOKEN_DURATION_MINUTE:5}
@@ -28,13 +30,14 @@ jwt:
   refresh-token-duration-second: ${JWT_REFRESH_TOKEN_DURATION_SECOND:604800}
   access-cookie-name: ${JWT_ACCESS_COOKIE_NAME:access_token}
   refresh-cookie-name: ${JWT_REFRESH_COOKIE_NAME:refresh_token}
-server:
-  port: 8080
 
+upload:
+  path: /tmp/uploads
 ---
 spring:
   config:
     activate:
       on-profile: production
+
 server:
   port: 8080

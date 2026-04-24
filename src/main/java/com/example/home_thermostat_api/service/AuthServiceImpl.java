@@ -28,7 +28,7 @@ import com.example.home_thermostat_api.repository.RoleRepository;
 import com.example.home_thermostat_api.repository.TokenRepository;
 import com.example.home_thermostat_api.repository.UserRepository;
 import com.example.home_thermostat_api.security.JwtTokenProviderImpl;
-import com.example.home_thermostat_api.util.CookieUtil;
+import com.example.home_thermostat_api.utils.CookieUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
 
