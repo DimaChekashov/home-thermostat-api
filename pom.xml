@@ -120,6 +120,13 @@
             <version>0.11.5</version>
             <scope>runtime</scope>
         </dependency>
+
+		<!-- Telegram Bot -->
+		<dependency>
+			<groupId>org.telegram</groupId>
+			<artifactId>telegrambots</artifactId>
+			<version>6.8.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
