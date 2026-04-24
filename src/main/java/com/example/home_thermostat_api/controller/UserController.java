@@ -1,42 +1,32 @@
 package com.example.home_thermostat_api.controller;
 
-import com.example.home_thermostat_api.model.Home;
-import com.example.home_thermostat_api.model.User;
+import com.example.home_thermostat_api.dto.UserLoggedDto;
 import com.example.home_thermostat_api.service.UserService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    private final UserService userService;
+    @Autowired
+    private UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
-    @GetMapping("/{id}")
-    public User getById(@PathVariable Long id) {
-        return userService.getById(id);
-    }
-
-    @GetMapping("/{id}/homes")
-    public List<Home> getAllHomesByUserId(@PathVariable Long id) {
-        return userService.getAllHomesByUserId(id);
-    }
-
+    @Operation(summary = "Get Current User", description = "Returns the profile of the currently authenticated user", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "User data retrieved successfully")
+    @ApiResponse(responseCode = "401", description = "Authentication required")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
-    public User getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.getByUsername(userDetails.getUsername());
-        return user;
+    public ResponseEntity<UserLoggedDto> getCurrentUser() {
+        return ResponseEntity.ok(userService.getUserLoggedInfo());
     }
-
 }

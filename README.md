@@ -65,9 +65,7 @@ docker-compose restart postgres
 
 ### User
 
-- GET - `/api/users/{id}` Get user by ID
-- GET - `/api/users/{id}/homes` Get all homes for a user
-- GET - `/api/users/me` Get authorized user info
+- GET - `/api/users/me` Get currently authenticated user
 
 ### Home
 

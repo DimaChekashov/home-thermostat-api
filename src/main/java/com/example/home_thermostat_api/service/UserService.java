@@ -2,32 +2,21 @@ package com.example.home_thermostat_api.service;
 
 import java.util.List;
 
-import org.springframework.stereotype.Service;
+import com.example.home_thermostat_api.dto.UserDto;
+import com.example.home_thermostat_api.dto.UserLoggedDto;
 
-import com.example.home_thermostat_api.model.Home;
-import com.example.home_thermostat_api.model.User;
-import com.example.home_thermostat_api.repository.UserRepository;
+public interface UserService {
+    public List<UserDto> getUsers();
 
-@Service
-public class UserService {
-    private final UserRepository userRepository;
+    public UserDto create(UserDto userDto);
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    public UserDto getUser(Long userId);
 
-    public User getById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-    }
+    public UserDto getUser(String username);
 
-    public User getByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Username not found with name: " + username));
-    }
+    public UserDto updateUser(Long userId, UserDto userDto);
 
-    public List<Home> getAllHomesByUserId(Long userId) {
-        User user = getById(userId);
-        return user.getHomes();
-    }
+    public String deleteUser(Long userId);
+
+    UserLoggedDto getUserLoggedInfo();
 }
