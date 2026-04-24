@@ -33,6 +33,11 @@ jwt:
 
 upload:
   path: /tmp/uploads
+
+telegram:
+  bot:
+    token: ${TELEGRAM_BOT_TOKEN}
+    username: ${TELEGRAM_BOT_USERNAME}
 ---
 spring:
   config:
