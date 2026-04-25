@@ -47,28 +47,32 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public Room getById(Long roomId, User user) {
+    public Room getById(Long roomId, Long homeId, User user) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found: " + roomId));
 
+        if (!room.getHome().getId().equals(homeId)) {
+            throw new ResourceNotFoundException("Room not found in this home");
+        }
+
         if (!room.getHome().getUser().getId().equals(user.getId())) {
-            throw new AccessDeniedException("You don't have access to this room");
+            throw new AccessDeniedException("Access denied!");
         }
 
         return room;
     }
 
     @Override
-    public Room update(Long roomId, String name, User user) {
-        Room room = getById(roomId, user);
+    public Room update(Long roomId, Long homeId, String name, User user) {
+        Room room = getById(roomId, homeId, user);
         room.setName(name);
 
         return roomRepository.save(room);
     }
 
     @Override
-    public void delete(Long roomId, User user) {
-        Room room = getById(roomId, user);
+    public void delete(Long roomId, Long homeId, User user) {
+        Room room = getById(roomId, homeId, user);
         roomRepository.delete(room);
     }
 }

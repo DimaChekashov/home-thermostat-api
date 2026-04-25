@@ -22,7 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 
-@RequestMapping("/api/temperatures")
+@RequestMapping("/api/thermostats/{thermostatId}/temperatures")
 @RestController
 public class TemperatureReadingController {
     @Autowired
@@ -34,20 +34,20 @@ public class TemperatureReadingController {
     @Operation(summary = "Get temperature readings", description = "Returns latest readings for a thermostat")
     @ApiResponse(responseCode = "200", description = "List of readings")
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/{id}/readings")
+    @GetMapping("/readings")
     public ResponseEntity<List<TemperatureReading>> getReadings(
-            @PathVariable Long id,
+            @PathVariable Long thermostatId,
             @RequestParam(defaultValue = "60") int minutes,
             @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.getUserByUsername(userDetails.getUsername());
 
-        return ResponseEntity.ok(temperatureReadingService.getReadingsForPeriod(id, minutes, user));
+        return ResponseEntity.ok(temperatureReadingService.getReadingsForPeriod(thermostatId, minutes, user));
     }
 
     @Operation(summary = "Get current temperature", description = "Returns the latest temperature reading")
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/{id}/current")
-    public ResponseEntity<Double> getCurrentTemperature(@PathVariable Long id) {
-        return ResponseEntity.ok(temperatureReadingService.getCurrentTemperature(id));
+    @GetMapping("/current")
+    public ResponseEntity<Double> getCurrentTemperature(@PathVariable Long thermostatId) {
+        return ResponseEntity.ok(temperatureReadingService.getCurrentTemperature(thermostatId));
     }
 }

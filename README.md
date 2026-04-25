@@ -65,25 +65,37 @@ docker-compose restart postgres
 
 ### User
 
-- GET - `/api/users/me` Get currently authenticated user
+- GET - `/api/users/me` Get currently authenticated user info
 
 ### Home
 
+- GET - `/api/homes` Get all homes of current user
 - GET - `/api/homes/{id}` Get home by ID
 - POST - `/api/homes` Create a new home
-- POST - `/api/homes/{id}` Update existing home
-- GET - `/api/homes/{id}/rooms` Get all rooms in a home
+- PUT - `/api/homes/{id}` Update existing home
+- DELETE - `/api/homes/{id}` Delete home
 
 ### Room
 
-- GET - `/api/rooms/{id}` Get room by ID
-- GET - `/api/rooms/{id}/temperatures` Get all temperature readings for a room
-- POST - `/api/rooms/{id}/target?target={value}` Update room's target temperature
-- POST - `/api/rooms?homeId={id}` Create a new room in a home
+- GET - `/api/homes/{homeId}/rooms` Get all rooms in a home
+- GET - `/api/homes/{homeId}/rooms/{id}` Get room by ID
+- POST - `/api/homes/{homeId}/rooms` Create a new room in a home
+- PUT - `/api/homes/{homeId}/rooms/{id}` Update room
+- DELETE - `/api/homes/{homeId}/rooms/{id}` Delete room
+
+### Thermostat
+
+- GET - `/api/thermostats/{id}` Get thermostat by ID
+- GET - `/api/thermostats/room/{roomId}` Get thermostat by room ID
+- PUT - `/api/thermostats/{id}/target?value={temp}` Set target temperature
+- PUT - `/api/thermostats/{id}/mode?mode={mode}` Set thermostat mode (HEAT/COOL/OFF)
+- PUT - `/api/thermostats/{id}/status?status={status}` Set thermostat status (ACTIVE, INACTIVE)
 
 ### TemperatureReading
 
-- GET - `/api/temperatures` Get all temperature readings
-- GET - `/api/temperatures/room/{roomId}` Get temperature readings by room ID
-- GET - `/api/temperatures/home/{homeId}` Get temperature readings by home ID
-- POST - `/api/temperatures?roomId={id}` Create new temperature reading
+- GET - `/api/thermostats/{thermostatId}/temperatures/readings?minutes={n}` Get temperature readings for period
+- GET - `/api/thermostats/{thermostatId}/temperatures/current` Get current temperature
+
+### Device Integration (for IoT sensors)
+
+- POST - `/api/devices/{thermostatId}/temperature?value={temp}` - Report temperature from sensor

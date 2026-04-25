@@ -10,9 +10,9 @@ public interface RoomService {
 
     List<Room> getRoomsByHomeId(Long homeId, User user);
 
-    Room getById(Long roomId, User user);
+    Room getById(Long roomId, Long homeId, User user);
 
-    void delete(Long roomId, User user);
+    void delete(Long roomId, Long homeId, User user);
 
-    Room update(Long roomId, String name, User user);
+    Room update(Long roomId, Long homeId, String name, User user);
 }

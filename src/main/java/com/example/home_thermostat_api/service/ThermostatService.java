@@ -9,7 +9,7 @@ import com.example.home_thermostat_api.model.User;
 public interface ThermostatService {
     Thermostat create(Room room);
 
-    Thermostat getByRoom(Room room, User user);
+    Thermostat getByRoomId(Long roomId, User user);
 
     Thermostat getById(Long thermostatId, User user);
 

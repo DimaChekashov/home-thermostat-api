@@ -14,10 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.home_thermostat_api.enums.ThermostatModes;
 import com.example.home_thermostat_api.enums.ThermostatStatuses;
-import com.example.home_thermostat_api.model.Room;
 import com.example.home_thermostat_api.model.Thermostat;
 import com.example.home_thermostat_api.model.User;
-import com.example.home_thermostat_api.service.RoomService;
 import com.example.home_thermostat_api.service.ThermostatService;
 import com.example.home_thermostat_api.service.UserService;
 
@@ -33,9 +31,6 @@ public class ThermostatController {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private RoomService roomService;
 
     @Operation(summary = "Get thermostat", description = "Returns thermostat details")
     @ApiResponse(responseCode = "200", description = "Thermostat found")
@@ -56,9 +51,8 @@ public class ThermostatController {
             @PathVariable Long roomId,
             @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.getUserByUsername(userDetails.getUsername());
-        Room room = roomService.getById(roomId, user);
 
-        return ResponseEntity.ok(thermostatService.getByRoom(room, user));
+        return ResponseEntity.ok(thermostatService.getByRoomId(roomId, user));
     }
 
     @Operation(summary = "Set target temperature", description = "Sets the desired temperature")

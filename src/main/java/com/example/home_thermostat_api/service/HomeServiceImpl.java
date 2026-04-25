@@ -38,7 +38,7 @@ public class HomeServiceImpl implements HomeService {
                 .orElseThrow(() -> new ResourceNotFoundException("Home not found"));
 
         if (!home.getUser().getId().equals(user.getId())) {
-            throw new AccessDeniedException("You don't have access to this home");
+            throw new AccessDeniedException("Access denied!");
         }
 
         return home;

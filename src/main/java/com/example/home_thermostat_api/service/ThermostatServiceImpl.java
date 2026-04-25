@@ -26,9 +26,15 @@ public class ThermostatServiceImpl implements ThermostatService {
     }
 
     @Override
-    public Thermostat getByRoom(Room room, User user) {
-        return thermostatRepository.findByRoom(room)
+    public Thermostat getByRoomId(Long roomId, User user) {
+        Thermostat thermostat = thermostatRepository.findByRoomId(roomId)
                 .orElseThrow(() -> new ResourceNotFoundException("Thermostat not found"));
+
+        if (!thermostat.getRoom().getHome().getUser().getId().equals(user.getId())) {
+            throw new AccessDeniedException("Access denied");
+        }
+
+        return thermostat;
     }
 
     @Override
@@ -38,7 +44,7 @@ public class ThermostatServiceImpl implements ThermostatService {
 
         Room room = thermostat.getRoom();
         if (!room.getHome().getUser().getId().equals(user.getId())) {
-            throw new AccessDeniedException("You don't have access to this room");
+            throw new AccessDeniedException("Access denied!");
         }
 
         return thermostat;

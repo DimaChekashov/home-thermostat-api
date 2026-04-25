@@ -38,7 +38,7 @@ public class TemperatureReadingServiceImpl implements TemperatureReadingService 
                 .orElseThrow(() -> new RuntimeException("Thermostat not found"));
 
         if (!thermostat.getRoom().getHome().getUser().getId().equals(user.getId())) {
-            throw new AccessDeniedException("Access to thermostat denied");
+            throw new AccessDeniedException("Access denied!");
         }
 
         return readingRepository.findTop10ByThermostatOrderByTimestampDesc(thermostat);
@@ -50,7 +50,7 @@ public class TemperatureReadingServiceImpl implements TemperatureReadingService 
                 .orElseThrow(() -> new RuntimeException("Thermostat not found"));
 
         if (!thermostat.getRoom().getHome().getUser().getId().equals(user.getId())) {
-            throw new AccessDeniedException("Access to thermostat denied");
+            throw new AccessDeniedException("Access denied!");
         }
 
         LocalDateTime after = LocalDateTime.now().minusMinutes(minutes);
