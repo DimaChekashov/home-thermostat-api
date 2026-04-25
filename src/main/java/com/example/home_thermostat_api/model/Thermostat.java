@@ -73,7 +73,7 @@ public class Thermostat {
         this.mode = mode;
     }
 
-    public ThermostatStatuses getSatus() {
+    public ThermostatStatuses getStatus() {
         return status;
     }
 

@@ -59,8 +59,8 @@ public class TemperatureReadingServiceImpl implements TemperatureReadingService 
 
     @Override
     public Double getCurrentTemperature(Long thermostatId) {
-        return readingRepository.findTopByThermostatOrderByTimestampDesc(
-                thermostatRepository.findById(thermostatId).orElseThrow())
+        return thermostatRepository.findById(thermostatId)
+                .flatMap(readingRepository::findTopByThermostatOrderByTimestampDesc)
                 .map(TemperatureReading::getValue)
                 .orElse(null);
     }
