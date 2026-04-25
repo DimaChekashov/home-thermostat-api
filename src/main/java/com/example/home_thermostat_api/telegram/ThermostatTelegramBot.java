@@ -10,15 +10,13 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Component
 public class ThermostatTelegramBot extends TelegramLongPollingBot {
 
-    @Value("${telegram.bot.token}")
-    private String botToken;
+    private final String botUsername;
 
-    @Value("${telegram.bot.username}")
-    private String botUsername;
-
-    @Override
-    public String getBotToken() {
-        return botToken;
+    public ThermostatTelegramBot(
+            @Value("${telegram.bot.token}") String botToken,
+            @Value("${telegram.bot.username}") String botUsername) {
+        super(botToken);
+        this.botUsername = botUsername;
     }
 
     @Override
@@ -29,7 +27,6 @@ public class ThermostatTelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-
             String messageText = update.getMessage().getText();
             Long chatId = update.getMessage().getChatId();
 
@@ -46,9 +43,8 @@ public class ThermostatTelegramBot extends TelegramLongPollingBot {
 
         try {
             execute(message);
-            System.out.println("✅ Сообщение отправлено в чат " + chatId + ": " + text);
         } catch (TelegramApiException e) {
-            System.err.println("❌ Ошибка отправки: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
