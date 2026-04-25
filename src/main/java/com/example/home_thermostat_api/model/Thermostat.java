@@ -32,8 +32,8 @@ public class Thermostat {
     @JsonIgnore
     private Room room;
 
+    @OneToMany(mappedBy = "thermostat", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
-    @OneToMany(mappedBy = "thermostat", cascade = CascadeType.ALL)
     private List<TemperatureReading> temperatureReadings = new ArrayList<>();
 
     public Thermostat() {

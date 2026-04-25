@@ -14,31 +14,33 @@ public class TemperatureReading {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private Double value;
+
+    @Column(nullable = false)
     private LocalDateTime timestamp;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private TemperatureReadingSources source;
+    private TemperatureReadingSources source = TemperatureReadingSources.SENSOR;
 
-    @ManyToOne
-    @JoinColumn(name = "thermostat_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "thermostat_id", nullable = false)
     @JsonIgnore
     private Thermostat thermostat;
 
     public TemperatureReading() {
+        this.timestamp = LocalDateTime.now();
     }
 
     public TemperatureReading(
-            Long id,
             Double value,
-            LocalDateTime timestamp,
             TemperatureReadingSources source,
             Thermostat thermostat) {
-        this.id = id;
         this.value = value;
-        this.timestamp = timestamp;
         this.source = source;
         this.thermostat = thermostat;
+        this.timestamp = LocalDateTime.now();
     }
 
     public Long getId() {
