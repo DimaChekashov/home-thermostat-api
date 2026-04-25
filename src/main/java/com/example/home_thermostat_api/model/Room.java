@@ -1,8 +1,5 @@
 package com.example.home_thermostat_api.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
@@ -15,26 +12,23 @@ public class Room {
     private Long id;
 
     private String name;
-    private Double targetTemperature;
 
     @ManyToOne
     @JoinColumn(name = "home_id")
     @JsonIgnore
     private Home home;
 
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
-    private List<TemperatureReading> temperatureReadings = new ArrayList<>();
+    @OneToOne(cascade = CascadeType.ALL)
+    private Thermostat thermostat;
 
     public Room() {
     }
 
-    public Room(Long id, String name, Double targetTemperature, Home home,
-            List<TemperatureReading> temperatureReadings) {
+    public Room(Long id, String name, Home home, Thermostat thermostat) {
         this.id = id;
         this.name = name;
-        this.targetTemperature = targetTemperature;
         this.home = home;
-        this.temperatureReadings = temperatureReadings;
+        this.thermostat = thermostat;
     }
 
     public Long getId() {
@@ -53,14 +47,6 @@ public class Room {
         this.name = name;
     }
 
-    public Double getTargetTemperature() {
-        return targetTemperature;
-    }
-
-    public void setTargetTemperature(Double targetTemperature) {
-        this.targetTemperature = targetTemperature;
-    }
-
     public Home getHome() {
         return home;
     }
@@ -69,11 +55,11 @@ public class Room {
         this.home = home;
     }
 
-    public List<TemperatureReading> getTemperatureReadings() {
-        return temperatureReadings;
+    public Thermostat getThermostat() {
+        return thermostat;
     }
 
-    public void setTemperatureReadings(List<TemperatureReading> temperatureReadings) {
-        this.temperatureReadings = temperatureReadings;
+    public void setThermostat(Thermostat thermostat) {
+        this.thermostat = thermostat;
     }
 }

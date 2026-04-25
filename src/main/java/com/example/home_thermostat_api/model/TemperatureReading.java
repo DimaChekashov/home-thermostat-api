@@ -2,6 +2,7 @@ package com.example.home_thermostat_api.model;
 
 import java.time.LocalDateTime;
 
+import com.example.home_thermostat_api.enums.TemperatureReadingSources;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
@@ -13,22 +14,31 @@ public class TemperatureReading {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Double temperature;
+    private Double value;
     private LocalDateTime timestamp;
 
+    @Enumerated(EnumType.STRING)
+    private TemperatureReadingSources source;
+
     @ManyToOne
-    @JoinColumn(name = "room_id")
+    @JoinColumn(name = "thermostat_id")
     @JsonIgnore
-    private Room room;
+    private Thermostat thermostat;
 
     public TemperatureReading() {
     }
 
-    public TemperatureReading(Long id, Double temperature, LocalDateTime timestamp, Room room) {
+    public TemperatureReading(
+            Long id,
+            Double value,
+            LocalDateTime timestamp,
+            TemperatureReadingSources source,
+            Thermostat thermostat) {
         this.id = id;
-        this.temperature = temperature;
+        this.value = value;
         this.timestamp = timestamp;
-        this.room = room;
+        this.source = source;
+        this.thermostat = thermostat;
     }
 
     public Long getId() {
@@ -39,12 +49,12 @@ public class TemperatureReading {
         this.id = id;
     }
 
-    public Double getTemperature() {
-        return temperature;
+    public Double getValue() {
+        return value;
     }
 
-    public void setTemperature(Double temperature) {
-        this.temperature = temperature;
+    public void setTemperature(Double value) {
+        this.value = value;
     }
 
     public LocalDateTime getTimestamp() {
@@ -55,11 +65,11 @@ public class TemperatureReading {
         this.timestamp = timestamp;
     }
 
-    public Room getRoom() {
-        return room;
+    public Thermostat getThermostat() {
+        return thermostat;
     }
 
-    public void setRoom(Room room) {
-        this.room = room;
+    public void setThermostat(Thermostat thermostat) {
+        this.thermostat = thermostat;
     }
 }
