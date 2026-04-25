@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.example.home_thermostat_api.exception.ResourceNotFoundException;
 import com.example.home_thermostat_api.model.Home;
 import com.example.home_thermostat_api.model.Room;
+import com.example.home_thermostat_api.model.Thermostat;
 import com.example.home_thermostat_api.model.User;
 import com.example.home_thermostat_api.repository.RoomRepository;
 
@@ -20,6 +21,9 @@ public class RoomServiceImpl implements RoomService {
     @Autowired
     private HomeService homeService;
 
+    @Autowired
+    private ThermostatService thermostatService;
+
     @Override
     public Room create(String name, Long homeId, User user) {
         Home home = homeService.getById(homeId, user);
@@ -27,6 +31,11 @@ public class RoomServiceImpl implements RoomService {
         Room room = new Room();
         room.setName(name);
         room.setHome(home);
+
+        room = roomRepository.save(room);
+
+        Thermostat thermostat = thermostatService.create(room);
+        room.setThermostat(thermostat);
 
         return roomRepository.save(room);
     }

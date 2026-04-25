@@ -40,7 +40,7 @@ public class RoomController {
     @Operation(summary = "Get rooms in home", description = "Returns all rooms in a home")
     @ApiResponse(responseCode = "200", description = "List of rooms")
     @PreAuthorize("isAuthenticated()")
-    @GetMapping
+    @GetMapping("/home/{homeId}")
     public ResponseEntity<List<Room>> getRooms(
             @PathVariable Long homeId,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -55,7 +55,6 @@ public class RoomController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
     public ResponseEntity<Room> getRoom(
-            @PathVariable Long homeId,
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.getUserByUsername(userDetails.getUsername());
@@ -66,7 +65,7 @@ public class RoomController {
     @Operation(summary = "Create room", description = "Adds a new room to a home")
     @ApiResponse(responseCode = "201", description = "Room created")
     @PreAuthorize("isAuthenticated()")
-    @PostMapping
+    @PostMapping("/{homeId}")
     public ResponseEntity<Room> createRoom(
             @PathVariable Long homeId,
             @RequestBody RoomRequest request,
@@ -82,7 +81,6 @@ public class RoomController {
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/{id}")
     public ResponseEntity<Room> updateRoom(
-            @PathVariable Long homeId,
             @PathVariable Long id,
             @RequestBody RoomRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -96,7 +94,6 @@ public class RoomController {
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoom(
-            @PathVariable Long homeId,
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.getUserByUsername(userDetails.getUsername());

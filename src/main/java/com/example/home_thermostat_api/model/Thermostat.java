@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.home_thermostat_api.enums.ThermostatModes;
+import com.example.home_thermostat_api.enums.ThermostatStatuses;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
@@ -15,27 +16,35 @@ public class Thermostat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Double targetTemperature;
+    @Column(nullable = false)
+    private Double targetTemperature = 22.00;
 
     @Enumerated(EnumType.STRING)
-    private ThermostatModes mode;
+    @Column(nullable = false)
+    private ThermostatModes mode = ThermostatModes.OFF;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ThermostatStatuses status = ThermostatStatuses.ACTIVE;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "room_id")
+    @JoinColumn(name = "room_id", nullable = false, unique = true)
     @JsonIgnore
     private Room room;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "thermostat", cascade = CascadeType.ALL)
     private List<TemperatureReading> temperatureReadings = new ArrayList<>();
 
     public Thermostat() {
     }
 
-    public Thermostat(Long id, Double targetTemperature, ThermostatModes mode, Room room,
+    public Thermostat(Long id, Double targetTemperature, ThermostatModes mode, ThermostatStatuses status, Room room,
             List<TemperatureReading> temperatureReadings) {
         this.id = id;
         this.targetTemperature = targetTemperature;
         this.mode = mode;
+        this.status = status;
         this.room = room;
         this.temperatureReadings = temperatureReadings;
     }
@@ -62,6 +71,14 @@ public class Thermostat {
 
     public void setMode(ThermostatModes mode) {
         this.mode = mode;
+    }
+
+    public ThermostatStatuses getSatus() {
+        return status;
+    }
+
+    public void setStatus(ThermostatStatuses status) {
+        this.status = status;
     }
 
     public Room getRoom() {
