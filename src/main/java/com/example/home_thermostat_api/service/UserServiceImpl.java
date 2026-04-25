@@ -65,6 +65,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getUserByUsername(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(
+                () -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+        return user;
+    }
+
+    @Override
     public UserDto updateUser(Long userId, UserDto userDto) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new AppException(HttpStatus.NOT_FOUND, "User not found"));

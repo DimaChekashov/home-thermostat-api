@@ -29,19 +29,19 @@ public class TemperatureReadingController {
         return temperatureReadingService.getAll();
     }
 
-    @GetMapping("/room/{roomId}")
-    public List<TemperatureReading> getTemperatureReadingByRoomId(@PathVariable Long roomId) {
-        return temperatureReadingService.getTemperatureReadingByRoomId(roomId);
-    }
+    // @GetMapping("/room/{roomId}")
+    // public List<TemperatureReading> getTemperatureReadingByRoomId(@PathVariable Long roomId) {
+    //     return temperatureReadingService.getTemperatureReadingByRoomId(roomId);
+    // }
 
-    @GetMapping("/home/{homeId}")
-    public List<TemperatureReading> getTemperatureReadingByHomeId(@PathVariable Long homeId) {
-        return temperatureReadingService.getTemperatureReadingByHomeId(homeId);
-    }
+    // @GetMapping("/home/{homeId}")
+    // public List<TemperatureReading> getTemperatureReadingByHomeId(@PathVariable Long homeId) {
+    //     return temperatureReadingService.getTemperatureReadingByHomeId(homeId);
+    // }
 
-    @PostMapping
-    public TemperatureReading create(@RequestParam Long roomId,
-            @RequestBody @Valid TemperatureReading temperatureReading) {
-        return temperatureReadingService.create(roomId, temperatureReading);
-    }
+    // @PostMapping
+    // public TemperatureReading create(@RequestParam Long roomId,
+    //         @RequestBody @Valid TemperatureReading temperatureReading) {
+    //     return temperatureReadingService.create(roomId, temperatureReading);
+    // }
 }

@@ -29,33 +29,33 @@ public class TemperatureReadingService {
         return temperatureReadingRepository.findAll();
     }
 
-    public List<TemperatureReading> getTemperatureReadingByRoomId(Long roomId) {
-        Room room = roomService.getById(roomId);
+    // public List<TemperatureReading> getTemperatureReadingByRoomId(Long roomId) {
+    //     Room room = roomService.getById(roomId);
 
-        return room.getTemperatureReadings();
-    }
+    //     return room.getTemperatureReadings();
+    // }
 
-    public List<TemperatureReading> getTemperatureReadingByHomeId(Long homeId) {
-        Home home = homeService.getById(homeId);
-        List<Room> rooms = home.getRooms();
+    // public List<TemperatureReading> getTemperatureReadingByHomeId(Long homeId) {
+    //     Home home = homeService.getById(homeId);
+    //     List<Room> rooms = home.getRooms();
 
-        if (rooms == null || rooms.isEmpty()) {
-            return Collections.emptyList();
-        }
+    //     if (rooms == null || rooms.isEmpty()) {
+    //         return Collections.emptyList();
+    //     }
 
-        return rooms.stream()
-                .filter(room -> room.getTemperatureReadings() != null)
-                .flatMap(room -> room.getTemperatureReadings().stream())
-                .sorted((r1, r2) -> r2.getTimestamp().compareTo(r1.getTimestamp()))
-                .collect(Collectors.toList());
-    }
+    //     return rooms.stream()
+    //             .filter(room -> room.getTemperatureReadings() != null)
+    //             .flatMap(room -> room.getTemperatureReadings().stream())
+    //             .sorted((r1, r2) -> r2.getTimestamp().compareTo(r1.getTimestamp()))
+    //             .collect(Collectors.toList());
+    // }
 
-    public TemperatureReading create(Long roomId, TemperatureReading temperatureReading) {
-        Room room = roomService.getById(roomId);
+    // public TemperatureReading create(Long roomId, TemperatureReading temperatureReading) {
+    //     Room room = roomService.getById(roomId);
 
-        temperatureReading.setRoom(room);
-        temperatureReading.setTimestamp(LocalDateTime.now());
+    //     temperatureReading.setRoom(room);
+    //     temperatureReading.setTimestamp(LocalDateTime.now());
 
-        return temperatureReadingRepository.save(temperatureReading);
-    }
+    //     return temperatureReadingRepository.save(temperatureReading);
+    // }
 }

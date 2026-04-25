@@ -23,22 +23,22 @@ public class RoomService {
         return roomRepository.findById(id).orElseThrow(RuntimeException::new);
     }
 
-    public List<TemperatureReading> getAllTemperaturesByRoomId(Long roomId) {
-        Room room = getById(roomId);
-        return room.getTemperatureReadings();
-    }
+    // public List<TemperatureReading> getAllTemperaturesByRoomId(Long roomId) {
+    //     Room room = getById(roomId);
+    //     return room.getTemperatureReadings();
+    // }
 
-    public Room create(Long homeId, Room room) {
-        Home home = homeService.getById(homeId);
-        room.setHome(home);
-        return roomRepository.save(room);
-    }
+    // public Room create(Long homeId, Room room) {
+    //     Home home = homeService.getById(homeId);
+    //     room.setHome(home);
+    //     return roomRepository.save(room);
+    // }
 
-    public Room updateTargetTemperature(Long id, Double target) {
-        Room room = getById(id);
+    // public Room updateTargetTemperature(Long id, Double target) {
+    //     Room room = getById(id);
 
-        room.setTargetTemperature(target);
+    //     room.setTargetTemperature(target);
 
-        return roomRepository.save(room);
-    }
+    //     return roomRepository.save(room);
+    // }
 }

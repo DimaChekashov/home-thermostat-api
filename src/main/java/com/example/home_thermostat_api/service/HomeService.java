@@ -2,39 +2,19 @@ package com.example.home_thermostat_api.service;
 
 import java.util.List;
 
-import org.springframework.stereotype.Service;
-
 import com.example.home_thermostat_api.model.Home;
-import com.example.home_thermostat_api.model.Room;
-import com.example.home_thermostat_api.repository.HomeRepository;
+import com.example.home_thermostat_api.model.User;
 
-@Service
-public class HomeService {
-    private final HomeRepository homeRepository;
+public interface HomeService {
 
-    public HomeService(HomeRepository homeRepository) {
-        this.homeRepository = homeRepository;
-    }
+    Home create(String name, String address, User user);
 
-    public Home getById(Long id) {
-        return homeRepository.findById(id).orElseThrow(RuntimeException::new);
-    }
+    List<Home> getUserHomes(User user);
 
-    public List<Room> getAllRoomsByHomeId(Long homeId) {
-        Home home = getById(homeId);
-        return home.getRooms();
-    }
+    Home getById(Long homeId, User user);
 
-    public Home create(Home home) {
-        return homeRepository.save(home);
-    }
+    void delete(Long homeId, User user);
 
-    public Home update(Long id, Home homeDetails) {
-        Home home = getById(id);
+    Home update(Long homeId, String name, String address, User user);
 
-        home.setName(homeDetails.getName());
-        home.setAddress(homeDetails.getAddress());
-
-        return homeRepository.save(home);
-    }
 }

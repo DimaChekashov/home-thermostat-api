@@ -23,6 +23,7 @@ public class Home {
     private User user;
 
     @OneToMany(mappedBy = "home")
+    @JsonIgnore
     private List<Room> rooms = new ArrayList<>();
 
     public Home() {

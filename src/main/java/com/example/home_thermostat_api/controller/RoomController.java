@@ -29,18 +29,18 @@ public class RoomController {
         return roomService.getById(id);
     }
 
-    @GetMapping("/{id}/temperatures")
-    public List<TemperatureReading> getAllTemperaturesByRoomId(@PathVariable Long id) {
-        return roomService.getAllTemperaturesByRoomId(id);
-    }
+    // @GetMapping("/{id}/temperatures")
+    // public List<TemperatureReading> getAllTemperaturesByRoomId(@PathVariable Long id) {
+    //     return roomService.getAllTemperaturesByRoomId(id);
+    // }
 
-    @PostMapping("/{id}/target")
-    public Room updateTargetTemperature(@PathVariable Long id, @RequestParam Double target) {
-        return roomService.updateTargetTemperature(id, target);
-    }
+    // @PostMapping("/{id}/target")
+    // public Room updateTargetTemperature(@PathVariable Long id, @RequestParam Double target) {
+    //     return roomService.updateTargetTemperature(id, target);
+    // }
 
-    @PostMapping
-    public Room create(@RequestParam Long homeId, @RequestBody Room room) {
-        return roomService.create(homeId, room);
-    }
+    // @PostMapping
+    // public Room create(@RequestParam Long homeId, @RequestBody Room room) {
+    //     return roomService.create(homeId, room);
+    // }
 }
