@@ -68,6 +68,18 @@ docker-compose down -v
 docker exec -it thermostat-db psql -U postgres -d rest_api
 ```
 
+## File Import Format
+
+### Excel Template (.xlsx)
+
+| value | timestamp | source |
+|:---|:---|:---|
+| 23.5 | 2026-04-26 10:00:00 | SENSOR |
+| 23.3 | 2026-04-26 10:30:00 | SENSOR |
+| 23.7 | 2026-04-26 11:00:00 | SENSOR |
+| 24.0 | 2026-04-26 11:30:00 | SIMULATOR |
+| 23.8 | 2026-04-26 12:00:00 | MANUAL |
+
 ## API Endpoints
 
 ### Authentication
@@ -118,3 +130,7 @@ docker exec -it thermostat-db psql -U postgres -d rest_api
 
 - GET - `/api/reports/summary` Download summary Excel report for all homes
 - GET - `/api/reports/temperature/{homeId}?days={n}` Download temperature Excel report for a home
+
+### Data Import
+
+- POST - `/api/import/excel/{thermostatId}` Upload Excel file with temperature data
