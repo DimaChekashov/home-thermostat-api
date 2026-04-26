@@ -67,6 +67,14 @@ public class TemperatureReading {
         this.timestamp = timestamp;
     }
 
+    public TemperatureReadingSources getSource() {
+        return source;
+    }
+
+    public void setSource(TemperatureReadingSources source) {
+        this.source = source;
+    }
+
     public Thermostat getThermostat() {
         return thermostat;
     }

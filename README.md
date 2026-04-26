@@ -1,57 +1,71 @@
 # home-thermostat-api
 
-## Setup
+Home Thermostat API — REST API для системы умного термостата, которое позволяет управлять домами, комнатами, термостатами и отслеживать температуру.
 
-Run project:
+## Tech Stack
+
+- Java 21
+- Spring Boot 4.0.0
+- Spring Security + JWT
+- PostgreSQL
+- Apache POI (Excel reports)
+- Telegram Bot API
+- Swagger/OpenAPI
+
+## Quick Start
+
+### 1. Clone and configure
+
+```bash
+git clone https://github.com/DimaChekashov/home-thermostat-api.git
+cd home-thermostat-api
+
+# Create config from template
+cp /src/main/resources/secret.properties.example /src/main/resources/secret.properties
+# Edit secret.properties with your values
+```
+
+### 2. Start database
+
+```bash
+# Start PostgreSQL container
+docker-compose up -d postgres
+
+# Check if running
+docker-compose ps
+```
+
+### 3. Run app
 
 ```bash
 mvn spring-boot:run
 ```
 
-Swagger: /swagger-ui/index.html
+### 4. Open Swagger
 
-### Docker:
+http://localhost:8080/swagger-ui/index.html
 
-```bash
-# Build docker compose
-docker compose up -d
+### 5. Telegram Bot
 
-# Start db container
-docker start thermostat-db
+https://t.me/home_thermostat_bot
 
-# Stop db container
-docker stop thermostat-db
-
-# Restart db container
-docker restart thermostat-db
-
-# Delete db container
-docker rm -f thermostat-db
-
-# Connect to db container
-docker exec -it thermostat-db psql -U postgres -d rest_api
-```
-
-### Docker compose:
+## Docker Commands
 
 ```bash
-# Start all services
-docker-compose up -d
-
-# start postgres service
+# Start database
 docker-compose up -d postgres
 
-# Stop all services
-docker-compose down
+# Stop database
+docker-compose stop postgres
 
-# Stop and delete volumes
+# Restart database
+docker-compose restart postgres
+
+# Delete database (with data)
 docker-compose down -v
 
-# Show postgres service logs
-docker-compose logs postgres
-
-# Restart postgres service
-docker-compose restart postgres
+# Connect to database
+docker exec -it thermostat-db psql -U postgres -d rest_api
 ```
 
 ## API Endpoints
@@ -98,4 +112,9 @@ docker-compose restart postgres
 
 ### Device Integration (for IoT sensors)
 
-- POST - `/api/devices/{thermostatId}/temperature?value={temp}` - Report temperature from sensor
+- POST - `/api/devices/{thermostatId}/temperature?value={temp}` Report temperature from sensor
+
+### Reports (Excel)
+
+- GET - `/api/reports/summary` Download summary Excel report for all homes
+- GET - `/api/reports/temperature/{homeId}?days={n}` Download temperature Excel report for a home
