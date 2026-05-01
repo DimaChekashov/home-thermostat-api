@@ -34,19 +34,13 @@ public class ThermostatTelegramBot extends TelegramLongPollingBot {
     @Autowired
     private TelegramKeyboards telegramKeyboards;
 
+    @Autowired
+    private TelegramService telegramService;
+
     private final Map<Long, UserState> userStates = new HashMap<>();
     private final Map<Long, String> userTokens = new HashMap<>();
     private final Map<Long, String[]> tempData = new HashMap<>();
-
-    private enum UserState {
-        START,
-        AWAITING_USERNAME,
-        AWAITING_PASSWORD,
-        AWAITING_REGISTER_USERNAME,
-        AWAITING_REGISTER_EMAIL,
-        AWAITING_REGISTER_PASSWORD,
-        LOGGED_IN
-    }
+    private final Map<Long, String> authenticatedUsers = new HashMap<>();
 
     public ThermostatTelegramBot(
             @Value("${telegram.bot.token}") String botToken,
@@ -140,6 +134,7 @@ public class ThermostatTelegramBot extends TelegramLongPollingBot {
             System.out.println("🔍 Бот: ответ = " + response.getStatusCode());
 
             if (response.getBody() != null && response.getBody().isLogged()) {
+                authenticatedUsers.put(chatId, username);
                 userTokens.put(chatId, "bot_authenticated");
                 userStates.put(chatId, UserState.LOGGED_IN);
                 tempData.remove(chatId);
@@ -198,9 +193,27 @@ public class ThermostatTelegramBot extends TelegramLongPollingBot {
 
     private void handleLoggedIn(Long chatId, String text) {
         switch (text) {
-            case "🏠 Мои дома" -> sendMessage(chatId, "Список ваших домов...");
-            case "🌡️ Температура" -> sendMessage(chatId, "Температура...");
+            case "🏠 Мои дома" -> {
+                String username = authenticatedUsers.get(chatId);
+                if (username == null) {
+                    sendMessage(chatId, "❌ Вы не авторизованы.");
+                    return;
+                }
+                String homesList = telegramService.getUserHomes(username);
+                sendMessage(chatId, homesList);
+            }
+
+            case "🌡️ Температура" -> {
+                String username = authenticatedUsers.get(chatId);
+                if (username == null) {
+                    sendMessage(chatId, "❌ Вы не авторизованы.");
+                    return;
+                }
+                String tempMessage = telegramService.getTemperatures(username);
+                sendMessage(chatId, tempMessage);
+            }
             case "🚪 Выйти" -> {
+                authenticatedUsers.remove(chatId);
                 userStates.remove(chatId);
                 userTokens.remove(chatId);
                 sendMessageWithKeyboard(chatId, "Вы вышли из системы.", telegramKeyboards.getAuthKeyboard());

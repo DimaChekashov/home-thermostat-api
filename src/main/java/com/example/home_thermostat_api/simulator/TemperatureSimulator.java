@@ -10,9 +10,8 @@ import com.example.home_thermostat_api.enums.ThermostatStatuses;
 import com.example.home_thermostat_api.repository.ThermostatRepository;
 import com.example.home_thermostat_api.service.TemperatureReadingService;
 
-// Decomment for simulate temperature reading
-// @Component
-// @EnableScheduling
+@Component
+@EnableScheduling
 public class TemperatureSimulator {
 
     @Autowired
