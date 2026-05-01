@@ -17,4 +17,8 @@ public interface AuthService {
     ResponseEntity<LoginResponse> refresh(String refreshToken, HttpServletResponse response);
 
     ResponseEntity<LoginResponse> logout(String accessToken, String refreshToken, HttpServletResponse response);
+
+    ResponseEntity<LoginResponse> loginForBot(LoginRequest request);
+
+    ResponseEntity<RegisterResponse> registerForBot(RegisterRequest request);
 }

@@ -1,13 +1,29 @@
 package com.example.home_thermostat_api.telegram;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+
+import com.example.home_thermostat_api.dto.LoginRequest;
+import com.example.home_thermostat_api.dto.LoginResponse;
+import com.example.home_thermostat_api.dto.RegisterRequest;
+import com.example.home_thermostat_api.dto.RegisterResponse;
+import com.example.home_thermostat_api.service.AuthService;
 
 import jakarta.annotation.PostConstruct;
 
@@ -15,6 +31,23 @@ import jakarta.annotation.PostConstruct;
 public class ThermostatTelegramBot extends TelegramLongPollingBot {
 
     private final String botUsername;
+
+    @Autowired
+    private AuthService authService;
+
+    private final Map<Long, UserState> userStates = new HashMap<>();
+    private final Map<Long, String> userTokens = new HashMap<>();
+    private final Map<Long, String[]> tempData = new HashMap<>();
+
+    private enum UserState {
+        START,
+        AWAITING_USERNAME,
+        AWAITING_PASSWORD,
+        AWAITING_REGISTER_USERNAME,
+        AWAITING_REGISTER_EMAIL,
+        AWAITING_REGISTER_PASSWORD,
+        LOGGED_IN
+    }
 
     public ThermostatTelegramBot(
             @Value("${telegram.bot.token}") String botToken,
@@ -44,11 +77,172 @@ public class ThermostatTelegramBot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             Long chatId = update.getMessage().getChatId();
+            String userName = update.getMessage().getFrom().getFirstName();
 
-            String response = "🔊 Вы сказали: " + messageText;
+            if (messageText.equals("/start")) {
+                userStates.put(chatId, UserState.START);
+                sendMessageWithKeyboard(chatId,
+                        "👋 Привет, " + userName + "!\nВыберите действие:",
+                        getAuthKeyboard());
+                return;
+            }
 
-            sendMessage(chatId, response);
+            if (messageText.equals("/logout")) {
+                userStates.remove(chatId);
+                userTokens.remove(chatId);
+                tempData.remove(chatId);
+                sendMessageWithKeyboard(chatId, "👋 Вы вышли из системы.", getAuthKeyboard());
+                return;
+            }
+
+            UserState state = userStates.getOrDefault(chatId, UserState.START);
+
+            switch (state) {
+                case START -> handleStartState(chatId, messageText);
+                case AWAITING_USERNAME -> handleLoginUsername(chatId, messageText);
+                case AWAITING_PASSWORD -> handleLoginPassword(chatId, messageText);
+                case AWAITING_REGISTER_USERNAME -> handleRegisterUsername(chatId, messageText);
+                case AWAITING_REGISTER_EMAIL -> handleRegisterEmail(chatId, messageText);
+                case AWAITING_REGISTER_PASSWORD -> handleRegisterPassword(chatId, messageText);
+                case LOGGED_IN -> handleLoggedIn(chatId, messageText);
+            }
         }
+    }
+
+    private void handleStartState(Long chatId, String text) {
+        switch (text) {
+            case "🔐 Войти" -> {
+                userStates.put(chatId, UserState.AWAITING_USERNAME);
+                sendMessage(chatId, "Введите ваш username:");
+            }
+            case "📝 Регистрация" -> {
+                userStates.put(chatId, UserState.AWAITING_REGISTER_USERNAME);
+                sendMessage(chatId, "Придумайте username:");
+            }
+            default -> sendMessageWithKeyboard(chatId, "Выберите действие:", getAuthKeyboard());
+        }
+    }
+
+    private void handleLoginUsername(Long chatId, String username) {
+        tempData.computeIfAbsent(chatId, k -> new String[3])[0] = username;
+        userStates.put(chatId, UserState.AWAITING_PASSWORD);
+        sendMessage(chatId, "Введите пароль:");
+    }
+
+    private void handleLoginPassword(Long chatId, String password) {
+        String username = tempData.get(chatId)[0];
+
+        System.out.println("🔍 Бот: попытка входа: username=" + username + ", password=" + password);
+
+        try {
+            LoginRequest loginRequest = new LoginRequest(username, password);
+            ResponseEntity<LoginResponse> response = authService.loginForBot(loginRequest);
+
+            System.out.println("🔍 Бот: ответ = " + response.getStatusCode());
+
+            if (response.getBody() != null && response.getBody().isLogged()) {
+                userTokens.put(chatId, "bot_authenticated");
+                userStates.put(chatId, UserState.LOGGED_IN);
+                tempData.remove(chatId);
+                sendMessageWithKeyboard(chatId,
+                        "✅ Вход выполнен! Добро пожаловать, " + username + "!",
+                        getMainKeyboard());
+            } else {
+                sendMessageWithKeyboard(chatId,
+                        "❌ Неверный логин или пароль.",
+                        getAuthKeyboard());
+                userStates.put(chatId, UserState.START);
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Бот: ошибка входа: " + e.getMessage());
+            sendMessageWithKeyboard(chatId,
+                    "❌ Неверный логин или пароль. Попробуйте снова.",
+                    getAuthKeyboard());
+            userStates.put(chatId, UserState.START);
+        }
+    }
+
+    private void handleRegisterUsername(Long chatId, String username) {
+        tempData.computeIfAbsent(chatId, k -> new String[3])[0] = username;
+        userStates.put(chatId, UserState.AWAITING_REGISTER_EMAIL);
+        sendMessage(chatId, "Введите email:");
+    }
+
+    private void handleRegisterEmail(Long chatId, String email) {
+        tempData.get(chatId)[1] = email;
+        userStates.put(chatId, UserState.AWAITING_REGISTER_PASSWORD);
+        sendMessage(chatId, "Придумайте пароль:");
+    }
+
+    private void handleRegisterPassword(Long chatId, String password) {
+        String username = tempData.get(chatId)[0];
+        String email = tempData.get(chatId)[1];
+
+        try {
+            RegisterRequest request = new RegisterRequest(username, email, password);
+            ResponseEntity<RegisterResponse> response = authService.registerForBot(request);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                userStates.put(chatId, UserState.LOGGED_IN);
+                tempData.remove(chatId);
+                sendMessageWithKeyboard(chatId,
+                        "✅ Регистрация успешна! Добро пожаловать, " + username + "!",
+                        getMainKeyboard());
+            }
+        } catch (Exception e) {
+            sendMessageWithKeyboard(chatId,
+                    "❌ Ошибка: " + e.getMessage(),
+                    getAuthKeyboard());
+            userStates.put(chatId, UserState.START);
+        }
+    }
+
+    private void handleLoggedIn(Long chatId, String text) {
+        switch (text) {
+            case "🏠 Мои дома" -> sendMessage(chatId, "Список ваших домов...");
+            case "🌡️ Температура" -> sendMessage(chatId, "Температура...");
+            case "🚪 Выйти" -> {
+                userStates.remove(chatId);
+                userTokens.remove(chatId);
+                sendMessageWithKeyboard(chatId, "Вы вышли из системы.", getAuthKeyboard());
+            }
+            default -> sendMessageWithKeyboard(chatId, "Выберите действие:", getMainKeyboard());
+        }
+    }
+
+    // Keyboards
+    private ReplyKeyboardMarkup getAuthKeyboard() {
+        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+        keyboard.setResizeKeyboard(true);
+
+        List<KeyboardRow> rows = new ArrayList<>();
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(new KeyboardButton("🔐 Войти"));
+        row1.add(new KeyboardButton("📝 Регистрация"));
+        rows.add(row1);
+
+        keyboard.setKeyboard(rows);
+        return keyboard;
+    }
+
+    private ReplyKeyboardMarkup getMainKeyboard() {
+        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+        keyboard.setResizeKeyboard(true);
+
+        List<KeyboardRow> rows = new ArrayList<>();
+
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(new KeyboardButton("🏠 Мои дома"));
+        row1.add(new KeyboardButton("🌡️ Температура"));
+        rows.add(row1);
+
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(new KeyboardButton("📊 Отчёты"));
+        row2.add(new KeyboardButton("🚪 Выйти"));
+        rows.add(row2);
+
+        keyboard.setKeyboard(rows);
+        return keyboard;
     }
 
     private void sendMessage(Long chatId, String text) {
@@ -56,6 +250,18 @@ public class ThermostatTelegramBot extends TelegramLongPollingBot {
         message.setChatId(chatId.toString());
         message.setText(text);
 
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendMessageWithKeyboard(Long chatId, String text, ReplyKeyboardMarkup keyboard) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId.toString());
+        message.setText(text);
+        message.setReplyMarkup(keyboard);
         try {
             execute(message);
         } catch (TelegramApiException e) {

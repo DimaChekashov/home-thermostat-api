@@ -31,6 +31,7 @@ import com.example.home_thermostat_api.security.JwtTokenProviderImpl;
 import com.example.home_thermostat_api.utils.CookieUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -149,6 +150,56 @@ public class AuthServiceImpl implements AuthService {
         LoginResponse loginResponse = new LoginResponse(false, null, null);
 
         return ResponseEntity.ok().body(loginResponse);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<LoginResponse> loginForBot(LoginRequest request) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.username(), request.password()));
+
+        User user = userRepository.findByUsername(request.username())
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found"));
+
+        Token accessToken = tokenProvider.generateAccessToken(
+                Map.of("role", user.getRole().getAuthority()), user);
+        Token refreshToken = tokenProvider.generateRefreshToken(user);
+
+        revokeAllTokenOfUser(user);
+        tokenRepository.saveAll(List.of(accessToken, refreshToken));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        LoginResponse loginResponse = new LoginResponse(true, user.getRole().getName(), null);
+        return ResponseEntity.ok().body(loginResponse);
+    }
+
+    @Override
+    public ResponseEntity<RegisterResponse> registerForBot(RegisterRequest request) {
+        if (userRepository.existsByUsername(request.username())) {
+            throw new AppException(HttpStatus.CONFLICT, "Username already exists");
+        }
+        if (userRepository.existsByEmail(request.email())) {
+            throw new AppException(HttpStatus.CONFLICT, "Email already exists");
+        }
+
+        User user = new User();
+        user.setUsername(request.username());
+        user.setEmail(request.email());
+        user.setPassword(passwordEncoder.encode(request.password()));
+
+        Role roleUser = roleRepository.findByName(Roles.USER.name()).orElseThrow();
+        user.setRole(roleUser);
+
+        userRepository.save(user);
+
+        Token accessToken = tokenProvider.generateAccessToken(
+                Map.of("role", user.getRole().getAuthority()), user);
+        Token refreshToken = tokenProvider.generateRefreshToken(user);
+        tokenRepository.saveAll(List.of(accessToken, refreshToken));
+
+        return ResponseEntity.ok(RegisterResponse.ok());
     }
 
     private void addAccessTokenCookie(HttpServletResponse response, Token token) {
