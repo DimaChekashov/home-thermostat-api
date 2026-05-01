@@ -2,7 +2,7 @@
 
 Home Thermostat API — REST API для системы умного термостата, которое позволяет управлять домами, комнатами, термостатами и отслеживать температуру.
 
-## Tech Stack
+## 📋 Tech Stack
 
 - Java 21
 - Spring Boot 4.0.0
@@ -11,64 +11,72 @@ Home Thermostat API — REST API для системы умного термос
 - Apache POI (Excel reports)
 - Telegram Bot API
 - Swagger/OpenAPI
+- Docker + Docker Compose
 
-## Quick Start
-
-### 1. Clone and configure
+## 🚀 Quick Start
 
 ```bash
+# 1. Clone
 git clone https://github.com/DimaChekashov/home-thermostat-api.git
 cd home-thermostat-api
 
-# Create config from template
-cp /src/main/resources/secret.properties.example /src/main/resources/secret.properties
-# Edit secret.properties with your values
-```
+# 2. Configure
+cp src/main/resources/secret.properties.example src/main/resources/secret.properties
+# Edit with your values
 
-### 2. Start database
-
-```bash
-# Start PostgreSQL container
+# 3. Start database
 docker compose up -d postgres
 
-# Check if running
-docker compose ps
-```
-
-### 3. Run app
-
-```bash
+# 4. Run
 mvn spring-boot:run
 ```
 
-### 4. Open Swagger
+- Swagger: http://localhost:8080/swagger-ui/index.html
+- Telegram Bot: https://t.me/home_thermostat_bot
 
-http://localhost:8080/swagger-ui/index.html
-
-### 5. Telegram Bot
-
-https://t.me/home_thermostat_bot
-
-## Docker Commands
+## 💻 Local Development
 
 ```bash
-# Start database
+# Start database only
 docker compose up -d postgres
 
-# Stop database
-docker compose stop postgres
+# Run with Maven
+mvn spring-boot:run
 
-# Restart database
-docker compose restart postgres
-
-# Delete database (with data)
-docker compose down -v
-
-# Connect to database
-docker exec -it thermostat-db psql -U postgres -d rest_api
+# Or run JAR
+mvn clean package -DskipTests
+java -jar target/home-thermostat-api-0.0.1-SNAPSHOT.jar
 ```
 
-## File Import Format
+## 🚢 Production Deploy
+
+```bash
+# 1. Clone and configure
+git clone https://github.com/DimaChekashov/home-thermostat-api.git
+cd home-thermostat-api
+cp .env.example .env
+nano .env
+
+# 2. Build and start
+docker compose up -d --build
+
+# 3. Verify
+curl http://localhost:8080/swagger-ui/index.html
+docker compose logs -f app
+```
+
+## 🐳 Docker Reference
+
+| Command | Description |
+|:---|:---|
+| docker compose up -d postgres | Start database |
+| docker compose up -d --build | Build and start all |
+| docker compose down | Stop all |
+| docker compose logs app | View app logs |
+| docker compose restart | Restart services |
+| docker exec -it thermostat-db psql -U postgres -d rest_api | Connect to DB |
+
+## 📥 Import Format
 
 ### Excel Template (.xlsx)
 
@@ -80,7 +88,11 @@ docker exec -it thermostat-db psql -U postgres -d rest_api
 | 24.0 | 2026-04-26 11:30:00 | SIMULATOR |
 | 23.8 | 2026-04-26 12:00:00 | MANUAL |
 
-## API Endpoints
+- value — temperature in °C
+- timestamp — format: yyyy-MM-dd HH:mm:ss
+- source — SENSOR, SIMULATOR, MANUAL, IMPORTED
+
+## 📡 API Endpoints
 
 ### Authentication
 
@@ -135,37 +147,68 @@ docker exec -it thermostat-db psql -U postgres -d rest_api
 
 - POST - `/api/import/excel/{thermostatId}` Upload Excel file with temperature data
 
-# Сборка и Деплой
+## 📸 Screenshots
 
-### Сборка и запуск
+### Swagger
 
-```bash
-# 1. Собрать JAR
-mvn clean package -DskipTests
+![Swagger](docs/screenshots/swagger-1.png)
+![Swagger](docs/screenshots/swagger-2.png)
 
-# 2. Собрать и запустить все контейнеры
-docker compose up -d --build
+### Telegram Bot
 
-# 3. Проверить логи
-docker compose logs app
+#### Main Screen
 
-# 4. Проверить работу
-curl http://localhost:8080/swagger-ui/index.html
-```
+![Bot](docs/screenshots/tg-bot-1.png)
 
-### Деплоя на сервер
+#### Start
 
-```bash
-# На сервере:
-git clone https://github.com/DimaChekashov/home-thermostat-api.git
-cd home-thermostat-api
+![Bot](docs/screenshots/tg-bot-2.png)
 
-# Copy env template
-cp .env.example .env
+#### Registration
 
-# Edit with real values
-nano .env
+![Bot](docs/screenshots/tg-bot-3.png)
 
-# Build JAR + Docker image + start containers
-docker compose up -d --build
-```
+#### Instructions
+
+![Bot](docs/screenshots/tg-bot-4.png)
+
+#### Show temperature
+
+![Bot](docs/screenshots/tg-bot-5.png)
+
+### Docker
+
+![Docker](docs/screenshots/docker.png)
+
+## 📝 Project Report
+
+### What was implemented
+
+- REST API for smart thermostat system
+- JWT authentication with HttpOnly cookies
+- CRUD for homes, rooms, thermostats
+- Temperature monitoring with simulator
+- Excel reports (download + import)
+- Telegram bot with keyboard navigation
+- Docker containerization
+- Role-based access control (RBAC)
+
+### Technologies used
+
+- Backend: Java 21, Spring Boot 4.0.0
+- Security: Spring Security, JWT
+- Database: PostgreSQL, Spring Data JPA
+- Reports: Apache POI
+- Bot: Telegram Bot Java Library
+- Containerization: Docker, Docker Compose
+- Docs: Swagger/OpenAPI 3.1
+
+### Resources
+
+- [Spring Boot Documentation](https://docs.spring.io/spring-boot/documentation.html)
+- [Spring Security Reference](https://docs.spring.io/spring-security/reference/index.html)
+- [JWT.io](JWT.io)
+- [Telegram Bot API Documentation](https://core.telegram.org/bots/api)
+- [TelegramBots Documentation](https://rubenlagus.github.io/TelegramBotsDocumentation/telegram-bots.html)
+- [Apache POI Documentation](https://poi.apache.org/apidocs/5.0/)
+- [Docker Documentation](https://docs.docker.com/)
