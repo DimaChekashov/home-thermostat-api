@@ -36,7 +36,7 @@ public class TelegramKeyboards {
         rows.add(row1);
 
         KeyboardRow row2 = new KeyboardRow();
-        row2.add(new KeyboardButton("📊 Отчёты"));
+        row2.add(new KeyboardButton("📖 Инструкция"));
         row2.add(new KeyboardButton("🚪 Выйти"));
         rows.add(row2);
 

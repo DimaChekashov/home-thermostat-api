@@ -125,8 +125,6 @@ public class ThermostatTelegramBot extends TelegramLongPollingBot {
     private void handleLoginPassword(Long chatId, String password) {
         String username = tempData.get(chatId)[0];
 
-        System.out.println("🔍 Бот: попытка входа: username=" + username + ", password=" + password);
-
         try {
             LoginRequest loginRequest = new LoginRequest(username, password);
             ResponseEntity<LoginResponse> response = authService.loginForBot(loginRequest);
@@ -212,6 +210,29 @@ public class ThermostatTelegramBot extends TelegramLongPollingBot {
                 String tempMessage = telegramService.getTemperatures(username);
                 sendMessage(chatId, tempMessage);
             }
+
+            case "📖 Инструкция" -> {
+                String instruction = """
+                        📖 *Инструкция по использованию Home Thermostat*
+
+                        🌐 *Web-интерфейс (Swagger):*
+                        %s/swagger-ui/index.html
+
+                        Через Swagger можно:
+                        • 🏠 Создавать и удалять дома
+                        • 🚪 Добавлять и удалять комнаты
+                        • 🌡️ Устанавливать температуру
+                        • 📊 Скачивать Excel отчёты
+                        • 📥 Загружать данные из CSV/Excel
+
+                        🤖 *Через бота доступно:*
+                        • Просмотр домов
+                        • Просмотр текущей температуры
+                        """.formatted("http://localhost:8080");
+
+                sendMessage(chatId, instruction);
+            }
+
             case "🚪 Выйти" -> {
                 authenticatedUsers.remove(chatId);
                 userStates.remove(chatId);
