@@ -1,8 +1,6 @@
 package com.example.home_thermostat_api.telegram;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +12,6 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
@@ -34,6 +30,9 @@ public class ThermostatTelegramBot extends TelegramLongPollingBot {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private TelegramKeyboards telegramKeyboards;
 
     private final Map<Long, UserState> userStates = new HashMap<>();
     private final Map<Long, String> userTokens = new HashMap<>();
@@ -83,7 +82,7 @@ public class ThermostatTelegramBot extends TelegramLongPollingBot {
                 userStates.put(chatId, UserState.START);
                 sendMessageWithKeyboard(chatId,
                         "👋 Привет, " + userName + "!\nВыберите действие:",
-                        getAuthKeyboard());
+                        telegramKeyboards.getAuthKeyboard());
                 return;
             }
 
@@ -91,7 +90,7 @@ public class ThermostatTelegramBot extends TelegramLongPollingBot {
                 userStates.remove(chatId);
                 userTokens.remove(chatId);
                 tempData.remove(chatId);
-                sendMessageWithKeyboard(chatId, "👋 Вы вышли из системы.", getAuthKeyboard());
+                sendMessageWithKeyboard(chatId, "👋 Вы вышли из системы.", telegramKeyboards.getAuthKeyboard());
                 return;
             }
 
@@ -119,7 +118,7 @@ public class ThermostatTelegramBot extends TelegramLongPollingBot {
                 userStates.put(chatId, UserState.AWAITING_REGISTER_USERNAME);
                 sendMessage(chatId, "Придумайте username:");
             }
-            default -> sendMessageWithKeyboard(chatId, "Выберите действие:", getAuthKeyboard());
+            default -> sendMessageWithKeyboard(chatId, "Выберите действие:", telegramKeyboards.getAuthKeyboard());
         }
     }
 
@@ -146,18 +145,18 @@ public class ThermostatTelegramBot extends TelegramLongPollingBot {
                 tempData.remove(chatId);
                 sendMessageWithKeyboard(chatId,
                         "✅ Вход выполнен! Добро пожаловать, " + username + "!",
-                        getMainKeyboard());
+                        telegramKeyboards.getMainKeyboard());
             } else {
                 sendMessageWithKeyboard(chatId,
                         "❌ Неверный логин или пароль.",
-                        getAuthKeyboard());
+                        telegramKeyboards.getAuthKeyboard());
                 userStates.put(chatId, UserState.START);
             }
         } catch (Exception e) {
             System.err.println("❌ Бот: ошибка входа: " + e.getMessage());
             sendMessageWithKeyboard(chatId,
                     "❌ Неверный логин или пароль. Попробуйте снова.",
-                    getAuthKeyboard());
+                    telegramKeyboards.getAuthKeyboard());
             userStates.put(chatId, UserState.START);
         }
     }
@@ -187,12 +186,12 @@ public class ThermostatTelegramBot extends TelegramLongPollingBot {
                 tempData.remove(chatId);
                 sendMessageWithKeyboard(chatId,
                         "✅ Регистрация успешна! Добро пожаловать, " + username + "!",
-                        getMainKeyboard());
+                        telegramKeyboards.getMainKeyboard());
             }
         } catch (Exception e) {
             sendMessageWithKeyboard(chatId,
                     "❌ Ошибка: " + e.getMessage(),
-                    getAuthKeyboard());
+                    telegramKeyboards.getAuthKeyboard());
             userStates.put(chatId, UserState.START);
         }
     }
@@ -204,45 +203,10 @@ public class ThermostatTelegramBot extends TelegramLongPollingBot {
             case "🚪 Выйти" -> {
                 userStates.remove(chatId);
                 userTokens.remove(chatId);
-                sendMessageWithKeyboard(chatId, "Вы вышли из системы.", getAuthKeyboard());
+                sendMessageWithKeyboard(chatId, "Вы вышли из системы.", telegramKeyboards.getAuthKeyboard());
             }
-            default -> sendMessageWithKeyboard(chatId, "Выберите действие:", getMainKeyboard());
+            default -> sendMessageWithKeyboard(chatId, "Выберите действие:", telegramKeyboards.getMainKeyboard());
         }
-    }
-
-    // Keyboards
-    private ReplyKeyboardMarkup getAuthKeyboard() {
-        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
-        keyboard.setResizeKeyboard(true);
-
-        List<KeyboardRow> rows = new ArrayList<>();
-        KeyboardRow row1 = new KeyboardRow();
-        row1.add(new KeyboardButton("🔐 Войти"));
-        row1.add(new KeyboardButton("📝 Регистрация"));
-        rows.add(row1);
-
-        keyboard.setKeyboard(rows);
-        return keyboard;
-    }
-
-    private ReplyKeyboardMarkup getMainKeyboard() {
-        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
-        keyboard.setResizeKeyboard(true);
-
-        List<KeyboardRow> rows = new ArrayList<>();
-
-        KeyboardRow row1 = new KeyboardRow();
-        row1.add(new KeyboardButton("🏠 Мои дома"));
-        row1.add(new KeyboardButton("🌡️ Температура"));
-        rows.add(row1);
-
-        KeyboardRow row2 = new KeyboardRow();
-        row2.add(new KeyboardButton("📊 Отчёты"));
-        row2.add(new KeyboardButton("🚪 Выйти"));
-        rows.add(row2);
-
-        keyboard.setKeyboard(rows);
-        return keyboard;
     }
 
     private void sendMessage(Long chatId, String text) {
