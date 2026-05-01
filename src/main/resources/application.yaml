@@ -43,6 +43,32 @@ spring:
   config:
     activate:
       on-profile: production
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
 
 server:
   port: 8080
+
+jwt:
+  secret: ${JWT_TOKEN_SECRET}
+  access-token-duration-minute: ${JWT_ACCESS_TOKEN_DURATION_MINUTE:5}
+  access-token-duration-second: ${JWT_ACCESS_TOKEN_DURATION_SECOND:300}
+  refresh-token-duration-day: ${JWT_REFRESH_TOKEN_DURATION_DAY:7}
+  refresh-token-duration-second: ${JWT_REFRESH_TOKEN_DURATION_SECOND:604800}
+  access-cookie-name: ${JWT_ACCESS_COOKIE_NAME:access_token}
+  refresh-cookie-name: ${JWT_REFRESH_COOKIE_NAME:refresh_token}
+
+upload:
+  path: /tmp/uploads
+
+telegram:
+  bot:
+    token: ${TELEGRAM_BOT_TOKEN}
+    username: ${TELEGRAM_BOT_USERNAME}

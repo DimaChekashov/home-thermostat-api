@@ -2,28 +2,46 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:14
+    image: postgres:14-alpine
     container_name: thermostat-db
+    env_file:
+      - .env
     environment:
       POSTGRES_DB: rest_api
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d rest_api"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
+      interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - thermostat-network
+
+  app:
+    build: .
+    container_name: thermostat-app
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: production
+      DB_URL: jdbc:postgresql://postgres:5432/rest_api
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_TOKEN_SECRET: ${JWT_TOKEN_SECRET}
+      JWT_ACCESS_TOKEN_DURATION_MINUTE: ${JWT_ACCESS_TOKEN_DURATION_MINUTE}
+      JWT_REFRESH_TOKEN_DURATION_DAY: ${JWT_REFRESH_TOKEN_DURATION_DAY}
+      JWT_ACCESS_COOKIE_NAME: ${JWT_ACCESS_COOKIE_NAME}
+      JWT_REFRESH_COOKIE_NAME: ${JWT_REFRESH_COOKIE_NAME}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME}
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
-  postgres_data:
-
-networks:
-  thermostat-network:
-    driver: bridge
+  pgdata:

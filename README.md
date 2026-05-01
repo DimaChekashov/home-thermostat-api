@@ -29,10 +29,10 @@ cp /src/main/resources/secret.properties.example /src/main/resources/secret.prop
 
 ```bash
 # Start PostgreSQL container
-docker-compose up -d postgres
+docker compose up -d postgres
 
 # Check if running
-docker-compose ps
+docker compose ps
 ```
 
 ### 3. Run app
@@ -53,16 +53,16 @@ https://t.me/home_thermostat_bot
 
 ```bash
 # Start database
-docker-compose up -d postgres
+docker compose up -d postgres
 
 # Stop database
-docker-compose stop postgres
+docker compose stop postgres
 
 # Restart database
-docker-compose restart postgres
+docker compose restart postgres
 
 # Delete database (with data)
-docker-compose down -v
+docker compose down -v
 
 # Connect to database
 docker exec -it thermostat-db psql -U postgres -d rest_api
@@ -134,3 +134,38 @@ docker exec -it thermostat-db psql -U postgres -d rest_api
 ### Data Import
 
 - POST - `/api/import/excel/{thermostatId}` Upload Excel file with temperature data
+
+# Сборка и Деплой
+
+### Сборка и запуск
+
+```bash
+# 1. Собрать JAR
+mvn clean package -DskipTests
+
+# 2. Собрать и запустить все контейнеры
+docker compose up -d --build
+
+# 3. Проверить логи
+docker compose logs app
+
+# 4. Проверить работу
+curl http://localhost:8080/swagger-ui/index.html
+```
+
+### Деплоя на сервер
+
+```bash
+# На сервере:
+git clone https://github.com/DimaChekashov/home-thermostat-api.git
+cd home-thermostat-api
+
+# Copy env template
+cp .env.example .env
+
+# Edit with real values
+nano .env
+
+# Build JAR + Docker image + start containers
+docker compose up -d --build
+```

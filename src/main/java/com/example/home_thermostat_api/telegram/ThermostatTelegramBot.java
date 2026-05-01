@@ -175,6 +175,8 @@ public class ThermostatTelegramBot extends TelegramLongPollingBot {
             ResponseEntity<RegisterResponse> response = authService.registerForBot(request);
 
             if (response.getStatusCode().is2xxSuccessful()) {
+                authenticatedUsers.put(chatId, username);
+                userTokens.put(chatId, "bot_authenticated");
                 userStates.put(chatId, UserState.LOGGED_IN);
                 tempData.remove(chatId);
                 sendMessageWithKeyboard(chatId,
